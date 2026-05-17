@@ -229,12 +229,14 @@ const missingPct = computed(() => {
 
 .cd__desc {
     margin: 0;
-    padding: 0 var(--space-12);
+    padding: var(--space-8) var(--space-12);
     font-size: var(--type-body);
     font-style: italic;
-    color: var(--ink-2);
+    color: var(--ink);
     line-height: 1.45;
-    border-left: 2px solid var(--rule);
+    background: var(--surface-accent);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 2px 2px 0;
 }
 
 .cd__headline {
