@@ -151,7 +151,7 @@ const hasIssues = computed(() => {
     container-type: inline-size;
     container-name: overview;
 
-    background: var(--surface);
+    background: transparent;
     color: var(--ink);
     padding: var(--space-16) var(--space-20) var(--space-16);
     font-family: var(--font-sans);
