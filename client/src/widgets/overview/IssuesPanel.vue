@@ -156,7 +156,6 @@ function onVarClick(name: string) {
     border: 1px solid color-mix(in srgb, var(--accent) 25%, var(--rule));
     border-radius: 3px;
     padding: var(--space-12) var(--space-16);
-    margin-bottom: var(--space-16);
 }
 
 .issues__head {

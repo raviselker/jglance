@@ -6,8 +6,12 @@ import {
     type OverviewTypeFilter,
     type OverviewSortMode,
 } from '../../composables/useOverviewState';
+import type { IOverviewData } from '../../common';
+
+import IssuesPanel from './IssuesPanel.vue';
 
 const props = defineProps<{
+    data: IOverviewData;
     nRows: number;
     nVarsTotal: number;
     nVarsShown: number;
@@ -19,14 +23,16 @@ const props = defineProps<{
     totalMissing: number;
     search: string;
     visibleNames: string[];
+    hasIssues: boolean;
 }>();
 
 const emit = defineEmits<{
     'update:search': [value: string];
+    'show-issues': [];
 }>();
 
 const state = inject<OverviewState>(OVERVIEW_STATE_KEY)!;
-const { typeFilter, sortMode, expanded } = state;
+const { typeFilter, sortMode, expanded, issuesDismissed } = state;
 
 const anyExpanded = computed(() => expanded.value.length > 0);
 
@@ -92,8 +98,19 @@ const varsBreakdown = computed(() => {
                     {{ totalMissing }} cell{{ totalMissing === 1 ? '' : 's' }}
                     missing
                 </p>
+                <button
+                    v-if="hasIssues && issuesDismissed"
+                    type="button"
+                    class="summary__restore-issues"
+                    @click="issuesDismissed = false"
+                >
+                    Issues hidden (restore)
+                </button>
             </div>
         </dl>
+
+        <!-- ===== issues panel (shown above controls if not dismissed) ===== -->
+        <IssuesPanel :data="data" />
 
         <!-- ===== controls (single flex row, wraps when narrow) ===== -->
         <div class="controls">
@@ -264,6 +281,26 @@ const varsBreakdown = computed(() => {
     font-size: var(--type-helper);
     color: var(--ink-3);
     line-height: 1.3;
+}
+
+.summary__restore-issues {
+    appearance: none;
+    background: transparent;
+    border: none;
+    color: var(--accent);
+    font: inherit;
+    font-size: var(--type-helper);
+    padding: 0;
+    margin-top: 6px;
+    cursor: pointer;
+    border-bottom: 1px dotted var(--accent-soft);
+    transition:
+        color var(--dur-fast) var(--ease-snap),
+        border-color var(--dur-fast) var(--ease-snap);
+}
+.summary__restore-issues:hover {
+    color: var(--bar-selected);
+    border-bottom-color: var(--bar-selected);
 }
 
 /* ---------- controls (single wrap-row) ---------- */

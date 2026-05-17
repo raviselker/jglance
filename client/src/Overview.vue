@@ -7,7 +7,6 @@ import {
 } from './composables/useOverviewState';
 
 import OverviewHeader from './widgets/overview/OverviewHeader.vue';
-import IssuesPanel from './widgets/overview/IssuesPanel.vue';
 import VariableListWidget from './widgets/overview/VariableListWidget.vue';
 
 const props = defineProps<{
@@ -86,12 +85,39 @@ const summaryStats = computed(() => {
         totalMissing,
     };
 });
+
+/* ---------- issue detection logic (duplicated from IssuesPanel) ---------- */
+const hasIssues = computed(() => {
+    const nRows = props.data.nRows;
+    const vars = props.data.variables;
+    const MISSING_THRESHOLD = 0.2;
+
+    const isHighMissing = (v: any) =>
+        nRows > 0 && v.nMissing / nRows > MISSING_THRESHOLD;
+    const isSingleLevel = (v: any) =>
+        (v.type === 'nominal' || v.type === 'ordinal') && v.nLevels <= 1;
+    const isConstantContinuous = (v: any) =>
+        v.type === 'continuous' && v.n >= 2 && v.sd === 0;
+    const isIdLike = (v: any) => {
+        if (v.type !== 'nominal' && v.type !== 'ordinal') return false;
+        return nRows >= 10 && v.nLevels >= nRows * 0.95;
+    };
+
+    return vars.some(
+        (v) =>
+            isHighMissing(v) ||
+            isSingleLevel(v) ||
+            isConstantContinuous(v) ||
+            isIdLike(v)
+    );
+});
 </script>
 
 <template>
     <article class="jglance jglance--overview">
         <OverviewHeader
             v-model:search="searchQuery"
+            :data="data"
             :n-rows="data.nRows"
             :n-vars-total="data.variables.length"
             :n-vars-shown="sortedVars.length"
@@ -102,9 +128,8 @@ const summaryStats = computed(() => {
             :total-cells="summaryStats.totalCells"
             :total-missing="summaryStats.totalMissing"
             :visible-names="sortedVars.map((v) => v.name)"
+            :has-issues="hasIssues"
         />
-
-        <IssuesPanel :data="data" />
 
         <div v-if="data.variables.length === 0" class="jglance__empty">
             <p>Nothing to show yet.</p>
