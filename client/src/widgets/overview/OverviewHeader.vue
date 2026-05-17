@@ -78,39 +78,43 @@ const varsBreakdown = computed(() => {
 
 <template>
     <header class="header">
-        <!-- ===== summary strip ===== -->
-        <dl class="summary">
-            <div class="summary__stat">
-                <dt>Rows</dt>
-                <dd>{{ nRows }}</dd>
-            </div>
-            <div class="summary__stat">
-                <dt>Variables</dt>
-                <dd>{{ nVarsTotal }}</dd>
-                <p v-if="varsBreakdown" class="summary__sub">
-                    {{ varsBreakdown }}
-                </p>
-            </div>
-            <div class="summary__stat summary__stat--right">
-                <dt>Complete</dt>
-                <dd>{{ completeLabel }}</dd>
-                <p v-if="totalMissing > 0" class="summary__sub">
-                    {{ totalMissing }} cell{{ totalMissing === 1 ? '' : 's' }}
-                    missing
-                </p>
-                <button
-                    v-if="hasIssues && issuesDismissed"
-                    type="button"
-                    class="summary__restore-issues"
-                    @click="issuesDismissed = false"
-                >
-                    Issues hidden (restore)
-                </button>
-            </div>
-        </dl>
+        <div class="header__top">
+            <!-- ===== summary strip ===== -->
+            <dl class="summary">
+                <div class="summary__stat">
+                    <dt>Rows</dt>
+                    <dd>{{ nRows }}</dd>
+                </div>
+                <div class="summary__stat">
+                    <dt>Variables</dt>
+                    <dd>{{ nVarsTotal }}</dd>
+                    <p v-if="varsBreakdown" class="summary__sub">
+                        {{ varsBreakdown }}
+                    </p>
+                </div>
+                <div class="summary__stat summary__stat--right">
+                    <dt>Complete</dt>
+                    <dd>{{ completeLabel }}</dd>
+                    <p v-if="totalMissing > 0" class="summary__sub">
+                        {{ totalMissing }} cell{{
+                            totalMissing === 1 ? '' : 's'
+                        }}
+                        missing
+                    </p>
+                    <button
+                        v-if="hasIssues && issuesDismissed"
+                        type="button"
+                        class="summary__restore-issues"
+                        @click="issuesDismissed = false"
+                    >
+                        Issues hidden (restore)
+                    </button>
+                </div>
+            </dl>
 
-        <!-- ===== issues panel (shown above controls if not dismissed) ===== -->
-        <IssuesPanel :data="data" />
+            <!-- ===== issues panel (shown above controls if not dismissed) ===== -->
+            <IssuesPanel :data="data" />
+        </div>
 
         <!-- ===== controls (single flex row, wraps when narrow) ===== -->
         <div class="controls">
@@ -237,14 +241,20 @@ const varsBreakdown = computed(() => {
     margin-bottom: var(--space-12);
 }
 
+.header__top {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-16);
+    padding-bottom: var(--space-16);
+    border-bottom: 1px solid var(--rule);
+}
+
 /* ---------- summary strip ---------- */
 .summary {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
     gap: var(--space-24);
     margin: 0;
-    padding-bottom: var(--space-16);
-    border-bottom: 1px solid var(--rule);
 }
 
 .summary__stat {
