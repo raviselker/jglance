@@ -9,4 +9,3 @@ node_modules/
 .geminiignore
 client/dist/
 *.jmo
-R/*.h.R
