@@ -5,35 +5,40 @@ overviewClass <- if (requireNamespace('jmvcore', quietly = TRUE))
         private = list(
             .init = function() {
                 overview <- self$results$overview
-                overview$scripts <- c('jglance.umd.js')
+                overview$scripts <- c("jglance.umd.js")
             },
             .run = function() {
                 varNames <- self$options$vars
-                if (is.null(varNames) || length(varNames) == 0)
+                if (is.null(varNames) || length(varNames) == 0) {
                     varNames <- names(self$data)
+                }
 
                 nRows <- nrow(self$data)
                 MAX_LEVELS_DISPLAYED <- 12L
 
                 variables <- lapply(varNames, function(name) {
                     v <- self$data[[name]]
-                    if (is.null(v)) return(NULL)
+                    if (is.null(v)) {
+                        return(NULL)
+                    }
 
                     nMissing <- sum(is.na(v))
                     vClean <- v[!is.na(v)]
                     n <- length(vClean)
 
-                    desc <- attr(v, 'jmv-desc')
-                    if (!is.null(desc) && nchar(desc) == 0) desc <- NULL
+                    desc <- attr(v, "jmv-desc")
+                    if (!is.null(desc) && nchar(desc) == 0) {
+                        desc <- NULL
+                    }
 
                     # ID columns may be flagged in different ways depending on how
                     # the column was marked: jamovi-engine sets `jmv-id = TRUE`,
                     # while files round-tripped through jmvReadWrite expose the
                     # measure type via `jmv-measure-type = 'ID'`.
-                    measureType <- attr(v, 'jmv-measure-type')
-                    isId <- isTRUE(attr(v, 'jmv-id')) ||
+                    measureType <- attr(v, "jmv-measure-type")
+                    isId <- isTRUE(attr(v, "jmv-id")) ||
                         (!is.null(measureType) &&
-                            tolower(as.character(measureType)) == 'id')
+                            tolower(as.character(measureType)) == "id")
 
                     if (isId) {
                         # Treat ID columns specially — show count + a sample,
@@ -43,14 +48,14 @@ overviewClass <- if (requireNamespace('jmvcore', quietly = TRUE))
                         list(
                             name = name,
                             description = desc,
-                            type = 'id',
+                            type = "id",
                             n = n,
                             nMissing = as.integer(nMissing),
                             nUnique = as.integer(length(unique(asChar))),
                             samples = as.list(samples)
                         )
                     } else if (is.factor(v)) {
-                        type <- if (is.ordered(v)) 'ordinal' else 'nominal'
+                        type <- if (is.ordered(v)) "ordinal" else "nominal"
                         tbl <- table(vClean)
                         # Preserve the factor's defined level order
                         # (critical for ordinal, and respects user intent for nominal too).
@@ -83,7 +88,7 @@ overviewClass <- if (requireNamespace('jmvcore', quietly = TRUE))
                             list(
                                 name = name,
                                 description = desc,
-                                type = 'continuous',
+                                type = "continuous",
                                 n = n,
                                 nMissing = as.integer(nMissing),
                                 min = if (n > 0) min(vClean) else 0,
@@ -108,7 +113,7 @@ overviewClass <- if (requireNamespace('jmvcore', quietly = TRUE))
                             list(
                                 name = name,
                                 description = desc,
-                                type = 'continuous',
+                                type = "continuous",
                                 n = n,
                                 nMissing = as.integer(nMissing),
                                 min = min(vClean),
@@ -144,7 +149,7 @@ overviewClass <- if (requireNamespace('jmvcore', quietly = TRUE))
                         list(
                             name = name,
                             description = desc,
-                            type = 'nominal',
+                            type = "nominal",
                             n = n,
                             nMissing = as.integer(nMissing),
                             nLevels = as.integer(nLevels),
@@ -174,30 +179,42 @@ overviewClass <- if (requireNamespace('jmvcore', quietly = TRUE))
                     auto_unbox = TRUE,
                     null = "null"
                 )
-                id <- paste0('jglance-overview', as.integer(runif(1) * 1e7))
+                id <- "jglance-overview-container"
 
                 overview <- self$results$overview
                 overview$setContent(paste0(
-                    '
-<link rel="stylesheet" href="module/jglance.css">
-<div id="',
+                    '<script>
+                (function() {
+                    if (!document.getElementById("jglance-css")) {
+                        var link = document.createElement("link");
+                        link.id = "jglance-css";
+                        link.rel = "stylesheet";
+                        link.href = "module/jglance.css";
+                        document.head.appendChild(link);
+                    }
+                })();
+                </script>
+                <div id="',
                     id,
-                    '"></div>
-<script>
-(function render() {
-    if (typeof Jglance === "undefined") {
-        setTimeout(render, 50);
-        return;
-    }
-    var data = ',
+                    '" class="jglance" style="opacity: 0;"></div>
+                <script>
+                (function render() {
+                    if (typeof Jglance === "undefined") {
+                        setTimeout(render, 50);
+                        return;
+                    }
+                    var data = ',
                     json,
                     ';
-    Jglance.createOverview("#',
+                    var app = Jglance.createOverview("#',
                     id,
                     '", data);
-})();
-</script>
-'
+                    /* Once Vue has mounted, show the container. */
+                    document.getElementById("',
+                    id,
+                    '").style.opacity = 1;
+                })();
+                </script>'
                 ))
             }
         )
