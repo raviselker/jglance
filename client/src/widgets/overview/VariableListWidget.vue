@@ -258,7 +258,7 @@ function previewStat(v: IVariableSummary): string {
     border: 1px solid var(--rule);
     border-radius: 4px;
     margin: var(--space-8) 0;
-    background: var(--surface);
+    background: var(--surface-sunk);
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
     overflow: hidden;
 }
@@ -276,7 +276,7 @@ function previewStat(v: IVariableSummary): string {
     letter-spacing: 0.1em;
     font-weight: 600;
     color: var(--ink-3);
-    background: var(--surface);
+    background: transparent;
 }
 .list__group:first-child {
     padding-top: var(--space-6);
