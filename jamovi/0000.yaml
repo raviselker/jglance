@@ -1,0 +1,25 @@
+---
+title: jglance
+name: jglance
+version: 0.1.0
+jms: '1.0'
+authors:
+  - Ravi Selker
+maintainer: Ravi Selker <selker.ravi@gmail.com>
+date: '2026-05-17'
+type: R
+description: >-
+  A quick visual overview of a dataset: scannable variable list with sparklines,
+  auto-detected data-quality notes, and per-variable detail panels.
+analyses:
+  - title: Data Overview
+    name: overview
+    ns: jglance
+    category: analyses
+    menuGroup: Exploration
+    menuSubgroup: jglance
+    menuTitle: Data Overview
+usesNative: true
+minApp: 2.7.14
+
+...

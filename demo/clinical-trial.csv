@@ -1,0 +1,81 @@
+"patient_id","age","sex","treatment","severity","weight_kg","anxiety_pre","anxiety_post","improvement","country","notes","study_phase","total_visits"
+"P1001",66,"M","Drug A","Mild",105.6,5,3,2,"US",,"Phase II",4
+"P1002",43,"M","Placebo","Moderate",76.6,2,3,-1,"UK",,"Phase II",4
+"P1003",54,"M","Placebo","Moderate",73.7,7,7,0,"UK",,"Phase II",4
+"P1004",58,"F","Drug B","Moderate",82.4,5,6,-1,"US",,"Phase II",4
+"P1005",55,"F","Placebo","Mild",75.6,6,7,-1,"US",,"Phase II",4
+"P1006",49,"F","Drug A","Moderate",73,7,6,1,"US",,"Phase II",4
+"P1007",68,"F","Drug A","Mild",97.2,3,1,2,"UK",,"Phase II",4
+"P1008",49,"F","Drug A","Mild",71.7,1,1,0,"US",,"Phase II",4
+"P1009",74,"F","Drug B","Moderate",55.7,2,1,1,"Italy",,"Phase II",4
+"P1010",49,"F","Drug A","Severe",80.8,4,2,2,"UK","reported mild headache","Phase II",4
+"P1011",66,"M","Placebo","Moderate",69.7,5,4,1,"Germany","missed follow-up","Phase II",4
+"P1012",77,"F","Drug B","Moderate",67.2,3,4,-1,"US","no comments","Phase II",4
+"P1013",33,"F","Placebo","Severe",59,4,5,-1,"US","extra session requested","Phase II",4
+"P1014",47,"F","Drug A","Moderate",81.4,3,3,0,"US",,"Phase II",4
+"P1015",48,"F","Drug A","Severe",72.4,1,1,0,"US","completed all sessions","Phase II",4
+"P1016",58,"F","Drug A","Mild",82.7,3,1,2,"UK",,"Phase II",4
+"P1017",47,"M","Drug A","Moderate",71.5,2,1,1,"US",,"Phase II",4
+"P1018",18,"M","Drug A","Moderate",65.1,5,3,2,"France","missed follow-up","Phase II",4
+"P1019",21,"M","Drug B","Severe",93.8,3,2,1,"US",,"Phase II",4
+"P1020",66,"M","Placebo","Severe",70.9,3,3,0,"Italy","reported mild headache","Phase II",4
+"P1021",46,"M","Placebo","Moderate",89.2,2,2,0,"France",,"Phase II",4
+"P1022",29,"M","Placebo","Mild",57,1,1,0,"UK",,"Phase II",4
+"P1023",48,"F","Drug A","Severe",68,5,2,3,"Italy","completed all sessions","Phase II",4
+"P1024",65,"F","Drug A","Severe",71,1,1,0,"UK","no comments","Phase II",4
+"P1025",73,"M","Drug A","Severe",69.1,4,1,3,"UK",,"Phase II",4
+"P1026",45,"M","Drug B","Mild",95.2,4,4,0,"France","extra session requested","Phase II",4
+"P1027",47,"M","Placebo","Moderate",74.7,7,7,0,"US",,"Phase II",4
+"P1028",29,"M","Placebo","Moderate",78.7,7,7,0,"UK",,"Phase II",4
+"P1029",56,"F","Drug A","Moderate",60.9,5,3,2,"UK","reported mild headache","Phase II",4
+"P1030",42,"F","Placebo","Moderate",64.1,3,4,-1,"US",,"Phase II",4
+"P1031",55,"F","Drug B","Mild",90,3,4,-1,"UK","no comments","Phase II",4
+"P1032",58,"M","Placebo","Moderate",93.9,7,7,0,"US",,"Phase II",4
+"P1033",62,"F","Drug B","Severe",93.7,6,5,1,"US",,"Phase II",4
+"P1034",43,"F","Placebo","Mild",54.3,5,6,-1,"US",,"Phase II",4
+"P1035",56,"F","Placebo","Moderate",105.7,3,3,0,"US",,"Phase II",4
+"P1036",29,"F","Drug A","Moderate",90.3,3,1,2,"Germany","completed all sessions","Phase II",4
+"P1037",41,"F","Drug A","Moderate",74.6,3,2,1,"UK",,"Phase II",4
+"P1038",40,"F","Drug A","Mild",85.6,2,1,1,"US",,"Phase II",4
+"P1039",21,"M","Placebo","Severe",60.4,3,5,-2,"Germany",,"Phase II",4
+"P1040",50,"M","Drug B","Moderate",58.6,5,5,0,"France","extra session requested","Phase II",4
+"P1041",52,"M","Drug A","Moderate",75.7,3,1,2,"France",,"Phase II",4
+"P1042",46,"F","Placebo","Moderate",57,1,1,0,"US",,"Phase II",4
+"P1043",59,"M","Placebo","Severe",77.9,4,4,0,"US","reported mild headache","Phase II",4
+"P1044",41,"F","Drug A","Mild",94.5,7,4,3,"UK",,"Phase II",4
+"P1045",34,"F","Drug A","Moderate",59.5,1,1,0,"Italy",,"Phase II",4
+"P1046",55,"F","Drug A","Mild",63.9,7,7,0,"UK","reported mild headache","Phase II",4
+"P1047",40,"M","Drug B","Moderate",75.7,3,2,1,"Italy",,"Phase II",4
+"P1048",67,"F","Drug A","Moderate",59.7,2,1,1,"UK",,"Phase II",4
+"P1049",45,"F","Drug A","Mild",69.3,5,4,1,"US",,"Phase II",4
+"P1050",58,"F","Drug B","Severe",88.1,2,3,-1,"UK",,"Phase II",4
+"P1051",54,"F","Placebo","Severe",89.5,7,5,2,"US",,"Phase II",4
+"P1052",41,"M","Drug A","Moderate",80.8,3,1,2,"Germany","missed follow-up","Phase II",4
+"P1053",69,"F","Drug B","Severe",47.2,5,6,-1,"France","completed all sessions","Phase II",4
+"P1054",58,"F","Drug B","Moderate",74.2,2,3,-1,"UK",,"Phase II",4
+"P1055",51,"F","Drug B","Mild",91,2,1,1,"UK",,"Phase II",4
+"P1056",53,"M","Drug B","Mild",87.2,3,2,1,"UK",,"Phase II",4
+"P1057",58,"M","Placebo","Severe",72.1,3,4,-1,"Italy","completed all sessions","Phase II",4
+"P1058",51,"F","Drug B","Moderate",45,4,4,0,"UK","reported mild headache","Phase II",4
+"P1059",18,"F","Placebo","Moderate",75.9,7,7,0,"Germany",,"Phase II",4
+"P1060",53,"M","Drug B","Severe",83.6,7,7,0,"US","missed follow-up","Phase II",4
+"P1061",46,"F","Drug A","Severe",75.7,3,1,2,"US",,"Phase II",4
+"P1062",52,"F","Drug A","Moderate",77.4,4,3,1,"Italy",,"Phase II",4
+"P1063",57,"F","Placebo","Mild",81.5,7,7,0,"Germany",,"Phase II",4
+"P1064",67,"M","Placebo","Moderate",69.1,4,4,0,"US","no comments","Phase II",4
+"P1065",41,"F","Drug A","Mild",94.6,7,5,2,"US","no comments","Phase II",4
+"P1066",66,"M","Drug B","Moderate",82.1,1,2,-1,"France",,"Phase II",4
+"P1067",54,"F","Drug A","Moderate",56.4,3,1,2,"UK",,"Phase II",4
+"P1068",62,"F","Drug B","Moderate",95.7,3,3,0,"UK",,"Phase II",4
+"P1069",61,"F","Drug A","Moderate",93.1,2,1,1,"UK","extra session requested","Phase II",4
+"P1070",59,"F","Drug B","Severe",87.4,7,7,0,"Germany",,"Phase II",4
+"P1071",37,"F","Drug A","Moderate",50.1,7,4,3,"US",,"Phase II",4
+"P1072",49,"F","Placebo","Severe",66.5,2,3,-1,"France","missed follow-up","Phase II",4
+"P1073",57,"F","Drug B","Moderate",84.5,5,4,1,"Italy",,"Phase II",4
+"P1074",39,"F","Placebo","Moderate",75.7,3,2,1,"France",,"Phase II",4
+"P1075",43,"M","Drug B","Moderate",80.2,3,2,1,"UK",,"Phase II",4
+"P1076",57,"M","Drug B","Mild",111.9,7,7,0,"US",,"Phase II",4
+"P1077",59,"F","Drug B","Moderate",62.7,4,3,1,"Germany","completed all sessions","Phase II",4
+"P1078",56,"M","Placebo","Moderate",45,4,3,1,"Italy",,"Phase II",4
+"P1079",39,"M","Drug A","Moderate",79.1,2,1,1,"Italy",,"Phase II",4
+"P1080",37,"F","Placebo","Moderate",64.7,7,6,1,"US","no comments","Phase II",4

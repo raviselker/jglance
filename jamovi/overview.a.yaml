@@ -1,0 +1,51 @@
+---
+name:  overview
+title: Data Overview
+menuGroup: Exploration
+menuSubgroup: jglance
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+
+    - name: vars
+      title: Variables (optional)
+      type: Variables
+      default: ~
+      takeFromDataIfMissing: true
+      permitted:
+        - numeric
+        - factor
+        - id
+
+    # ---- Hidden persistence options ----
+    # These hold UI state that should survive .omv save/reopen. The
+    # `hidden: true` flag tells jamovi-compiler not to auto-add UI controls
+    # for them. The JS sets them via window.setOption(), which jamovi
+    # persists with the analysis.
+    - name: sortMode
+      type: List
+      hidden: true
+      options:
+        - name: original
+        - name: name
+        - name: type
+        - name: missing-desc
+      default: original
+
+    - name: typeFilter
+      type: List
+      hidden: true
+      options:
+        - name: all
+        - name: continuous
+        - name: categorical
+      default: all
+
+    - name: issuesDismissed
+      type: Bool
+      hidden: true
+      default: false
+...

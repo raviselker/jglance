@@ -1,0 +1,14 @@
+Package: jglance
+Type: Package
+Title: Glance at jamovi Data
+Version: 0.1.0
+Author: Ravi Selker
+Maintainer: Ravi Selker <selker.ravi@gmail.com>
+Description: A jamovi module that gives a quick visual overview of an
+    entire dataset. Renders an interactive variable list with sparklines,
+    auto-detected data-quality notes, and per-variable detail panels.
+    Built on the besoplots technique (UMD bundle injected via an Html
+    results item).
+License: AGPL-3
+Encoding: UTF-8
+Imports: jmvcore, R6, jsonlite

@@ -1,0 +1,79 @@
+/* jglance design tokens — jamovi-native aesthetic.
+ * Clean sans, slate-blue accent, neutral surfaces.
+ * Scoped under `.jglance` so nothing leaks outside the widget. */
+
+.jglance {
+    /* ---------- typography (system stacks, no external fonts) ---------- */
+    --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --font-mono: 'SF Mono', SFMono-Regular, ui-monospace, Menlo, Consolas, 'Liberation Mono', monospace;
+
+    /* type scale */
+    --type-title-xl:   22px;
+    --type-title:      16px;
+    --type-subtitle:   13px;
+    --type-eyebrow:    11px;
+    --type-body:       13px;
+    --type-helper:     11px;
+    --type-num-xl:     30px;
+    --type-num-m:      14px;
+    --type-num-s:      11px;
+
+    /* ---------- spacing (4px base) ---------- */
+    --space-2:  2px;
+    --space-4:  4px;
+    --space-6:  6px;
+    --space-8:  8px;
+    --space-12: 12px;
+    --space-16: 16px;
+    --space-20: 20px;
+    --space-24: 24px;
+    --space-32: 32px;
+
+    /* ---------- light palette ---------- */
+    --surface:        #FFFFFF;    /* main results surface */
+    --surface-sunk:   #F4F5F7;    /* tonal block (stats panel) */
+    --surface-accent: #EBF1F7;    /* panel when a group is selected — faint blue wash */
+    --surface-row:    #FBFBFB;    /* zebra row tint */
+    --ink:         #222222;       /* primary text */
+    --ink-2:       #4A4A4A;       /* secondary text */
+    --ink-3:       #767676;       /* helper text, axis ticks */
+    --ink-4:       #A0A0A0;       /* tertiary */
+    --rule:        #D9D9D9;       /* table borders, hairlines */
+    --rule-strong: #6E6E6E;       /* the "thick" rule above table headers (jamovi style) */
+    --rule-soft:   #ECECEC;
+    --accent:      #3E6E96;       /* jamovi slate blue */
+    --accent-soft: #C8D6E4;
+    --bar:         #6A8AB0;       /* default bar — muted slate */
+    --bar-hover:   #4F779C;
+    --bar-selected:#3E6E96;       /* same as accent */
+    --focus-ring:  #5A8FB8;
+
+    /* ---------- motion ---------- */
+    --ease-snap: cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-rise: cubic-bezier(0.16, 1, 0.3, 1);
+    --dur-fast:  120ms;
+    --dur-base:  220ms;
+    --dur-slow:  520ms;
+}
+
+/* ---------- dark palette (opt-in only — never auto from OS preference,
+   since jamovi itself doesn't support dark mode yet) ---------- */
+:where(.theme-dark, [data-theme='dark'], [data-color-scheme='dark']) .jglance {
+    --surface:        #2A2A2A;
+    --surface-sunk:   #242424;
+    --surface-accent: #2D3A48;
+    --surface-row:    #2E2E2E;
+    --ink:         #E5E5E5;
+    --ink-2:       #BFBFBF;
+    --ink-3:       #8E8E8E;
+    --ink-4:       #5E5E5E;
+    --rule:        #404040;
+    --rule-strong: #8E8E8E;
+    --rule-soft:   #353535;
+    --accent:      #7AA3C6;
+    --accent-soft: #3C516A;
+    --bar:         #88A4C2;
+    --bar-hover:   #A3BBD3;
+    --bar-selected:#A8C5E0;
+    --focus-ring:  #A0BFD8;
+}
