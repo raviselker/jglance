@@ -50,29 +50,29 @@ Generated artifacts (don't edit, don't commit):
 
 ## Dev cycle
 
-**Formatting**:
+**Development Commands**:
 ```bash
-./scripts/format.sh
+just          # list all available commands
+just format   # format R and JS code
+just build    # build client + install module
+just dev      # run UI dev server
 ```
-Runs `air format` on R code and `prettier` on the client.
 
 **Iterating on the UI** (fast — no R or jamovi needed):
 ```bash
-cd client
-npm install   # first time only
-npm run dev   # serves index.html with fixture data
+just dev      # serves index.html with fixture data
 ```
 The harness mounts the Vue app against a fixture sized like jamovi's narrow column. Edit `src/` and Vite hot-reloads.
 
 **Installing into jamovi** (full integration):
 ```bash
-./scripts/build-and-install.sh
+just build
 ```
 Builds the client bundle to `inst/`, then runs `jmvtools::install()` which compiles the YAMLs, regenerates `R/overview.h.R`, and installs the module into your local jamovi library. **Restart jamovi** (fully — not just the analysis) after install to pick up UI changes.
 
 **Regenerating the demo dataset**:
 ```bash
-Rscript scripts/generate-demo-data.R
+just demo-data
 ```
 Needs `jmvReadWrite` installed if you want the `.omv` (descriptions + measure types preserved). The CSV is always written.
 
@@ -175,6 +175,7 @@ The module currently has one analysis (`overview`). To add another:
 4. Export a new factory from `main.ts` (e.g., `createX`) and attach to `window.Jglance`
 ## Committing
 
+- **Pre-commit Check** — code MUST be formatted (`just format`) and able to build (`just build`) before committing.
 - **Small logical commits** — break changes into small, focused commits with a single purpose.
 - **Commit title** — a single sentence in imperative mood, max 50 characters, no trailing dot, no type prefixes (e.g. no "feat:", "fix:").
 - **Optional description** — only to clarify functional choices (the "what" and "why"). Do not explain the "how" or anything already evident from the diff. Max line length 72 characters.

@@ -10,11 +10,12 @@ A jamovi module rendering an interactive **Data Overview** analysis. R6 analysis
 ## Key Commands
 
 ### Development & Build
-- `cd client && npm run dev`: Local UI development with fixture data (Vite dev server).
-- `./scripts/format.sh`: Formats R code (air) and client code (prettier).
-- `./scripts/build-and-install.sh`: Full build (client + R) and installation into jamovi.
-- `./scripts/install-module.sh`: R-only installation (yaml + R code changes).
-- `Rscript scripts/generate-demo-data.R`: Regenerate demo datasets in `demo/`.
+- `just`: List all available development commands.
+- `just format`: Formats R code (air) and client code (prettier).
+- `just build`: Full build (client + R) and installation into jamovi.
+- `just install`: R-only installation (yaml + R code changes).
+- `just dev`: Run local UI development server with fixture data.
+- `just demo-data`: Regenerate demo datasets in `demo/`.
 
 ### Validation
 - `cd client && npm run build`: Runs `vue-tsc` (type check) and `vite build`. **Always run before shipping.**
@@ -57,6 +58,7 @@ The module uses the "besoplots" technique:
 3. **Surgical Edits:** Maintain existing BEM-ish CSS patterns and TypeScript interfaces.
 ## Committing
 
+- **Pre-commit Check** — code MUST be formatted (`just format`) and able to build (`just build`) before committing.
 - **Small logical commits** — break changes into small, focused commits with a single purpose.
 - **Commit title** — a single sentence in imperative mood, max 50 characters, no trailing dot, no type prefixes (e.g. no "feat:", "fix:").
 - **Optional description** — only to clarify functional choices (the "what" and "why"). Do not explain the "how" or anything already evident from the diff. Max line length 72 characters.
