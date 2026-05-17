@@ -1,68 +1,73 @@
 <script setup lang="ts">
-import { computed, inject } from 'vue'
-import { OVERVIEW_STATE_KEY, type OverviewState, type OverviewTypeFilter, type OverviewSortMode } from '../../composables/useOverviewState'
+import { computed, inject } from 'vue';
+import {
+    OVERVIEW_STATE_KEY,
+    type OverviewState,
+    type OverviewTypeFilter,
+    type OverviewSortMode,
+} from '../../composables/useOverviewState';
 
 const props = defineProps<{
-    nRows: number
-    nVarsTotal: number
-    nVarsShown: number
-    nContinuous: number
-    nNominal: number
-    nOrdinal: number
-    nId: number
-    totalCells: number
-    totalMissing: number
-    search: string
-    visibleNames: string[]
-}>()
+    nRows: number;
+    nVarsTotal: number;
+    nVarsShown: number;
+    nContinuous: number;
+    nNominal: number;
+    nOrdinal: number;
+    nId: number;
+    totalCells: number;
+    totalMissing: number;
+    search: string;
+    visibleNames: string[];
+}>();
 
 const emit = defineEmits<{
-    'update:search': [value: string]
-}>()
+    'update:search': [value: string];
+}>();
 
-const state = inject<OverviewState>(OVERVIEW_STATE_KEY)!
-const { typeFilter, sortMode, expanded } = state
+const state = inject<OverviewState>(OVERVIEW_STATE_KEY)!;
+const { typeFilter, sortMode, expanded } = state;
 
-const anyExpanded = computed(() => expanded.value.length > 0)
+const anyExpanded = computed(() => expanded.value.length > 0);
 
 function toggleExpandAll() {
-    if (anyExpanded.value) state.collapseAll()
-    else state.expandAll(props.visibleNames)
+    if (anyExpanded.value) state.collapseAll();
+    else state.expandAll(props.visibleNames);
 }
 
 const typeOptions: { id: OverviewTypeFilter; label: string }[] = [
     { id: 'all', label: 'All' },
     { id: 'continuous', label: 'Continuous' },
     { id: 'categorical', label: 'Categorical' },
-]
+];
 
 const sortOptions: { id: OverviewSortMode; label: string }[] = [
     { id: 'original', label: 'Original order' },
     { id: 'name', label: 'Name' },
     { id: 'type', label: 'Type' },
     { id: 'missing-desc', label: 'Missing %' },
-]
+];
 
 const completePct = computed(() => {
-    if (props.totalCells === 0) return 100
-    return 100 - (props.totalMissing / props.totalCells) * 100
-})
+    if (props.totalCells === 0) return 100;
+    return 100 - (props.totalMissing / props.totalCells) * 100;
+});
 
 const completeLabel = computed(() => {
-    const pct = completePct.value
-    if (pct === 100) return '100%'
-    if (pct >= 99.95) return '> 99.9%'
-    return pct.toFixed(1) + '%'
-})
+    const pct = completePct.value;
+    if (pct === 100) return '100%';
+    if (pct >= 99.95) return '> 99.9%';
+    return pct.toFixed(1) + '%';
+});
 
 const varsBreakdown = computed(() => {
-    const parts: string[] = []
-    if (props.nContinuous > 0) parts.push(`${props.nContinuous} continuous`)
-    if (props.nNominal > 0)    parts.push(`${props.nNominal} nominal`)
-    if (props.nOrdinal > 0)    parts.push(`${props.nOrdinal} ordinal`)
-    if (props.nId > 0)         parts.push(`${props.nId} id`)
-    return parts.join(' · ')
-})
+    const parts: string[] = [];
+    if (props.nContinuous > 0) parts.push(`${props.nContinuous} continuous`);
+    if (props.nNominal > 0) parts.push(`${props.nNominal} nominal`);
+    if (props.nOrdinal > 0) parts.push(`${props.nOrdinal} ordinal`);
+    if (props.nId > 0) parts.push(`${props.nId} id`);
+    return parts.join(' · ');
+});
 </script>
 
 <template>
@@ -76,13 +81,16 @@ const varsBreakdown = computed(() => {
             <div class="summary__stat">
                 <dt>Variables</dt>
                 <dd>{{ nVarsTotal }}</dd>
-                <p v-if="varsBreakdown" class="summary__sub">{{ varsBreakdown }}</p>
+                <p v-if="varsBreakdown" class="summary__sub">
+                    {{ varsBreakdown }}
+                </p>
             </div>
             <div class="summary__stat summary__stat--right">
                 <dt>Complete</dt>
                 <dd>{{ completeLabel }}</dd>
                 <p v-if="totalMissing > 0" class="summary__sub">
-                    {{ totalMissing }} cell{{ totalMissing === 1 ? '' : 's' }} missing
+                    {{ totalMissing }} cell{{ totalMissing === 1 ? '' : 's' }}
+                    missing
                 </p>
             </div>
         </dl>
@@ -90,14 +98,40 @@ const varsBreakdown = computed(() => {
         <!-- ===== controls (single flex row, wraps when narrow) ===== -->
         <div class="controls">
             <label class="controls__search">
-                <svg class="controls__search-icon" width="13" height="13" viewBox="0 0 13 13" aria-hidden="true">
-                    <circle cx="5.5" cy="5.5" r="4" fill="none" stroke="currentColor" stroke-width="1.4" />
-                    <line x1="8.5" y1="8.5" x2="12" y2="12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+                <svg
+                    class="controls__search-icon"
+                    width="13"
+                    height="13"
+                    viewBox="0 0 13 13"
+                    aria-hidden="true"
+                >
+                    <circle
+                        cx="5.5"
+                        cy="5.5"
+                        r="4"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.4"
+                    />
+                    <line
+                        x1="8.5"
+                        y1="8.5"
+                        x2="12"
+                        y2="12"
+                        stroke="currentColor"
+                        stroke-width="1.4"
+                        stroke-linecap="round"
+                    />
                 </svg>
                 <input
                     type="text"
                     :value="search"
-                    @input="emit('update:search', ($event.target as HTMLInputElement).value)"
+                    @input="
+                        emit(
+                            'update:search',
+                            ($event.target as HTMLInputElement).value
+                        )
+                    "
                     placeholder="Search variables…"
                     class="controls__search-input"
                     aria-label="Search variables"
@@ -108,27 +142,56 @@ const varsBreakdown = computed(() => {
                     class="controls__search-clear"
                     @click="emit('update:search', '')"
                     aria-label="Clear search"
-                >×</button>
+                >
+                    ×
+                </button>
             </label>
 
             <div class="controls__group">
-                <button v-for="opt in typeOptions" :key="opt.id"
+                <button
+                    v-for="opt in typeOptions"
+                    :key="opt.id"
                     type="button"
                     class="controls__chip"
                     :class="{ 'is-active': typeFilter === opt.id }"
                     @click="typeFilter = opt.id"
-                >{{ opt.label }}</button>
+                >
+                    {{ opt.label }}
+                </button>
             </div>
 
             <label class="controls__sort">
                 <span class="controls__label">Sort:</span>
                 <span class="controls__select-wrap">
-                    <span class="controls__select-value">{{ sortOptions.find(o => o.id === sortMode)?.label }}</span>
-                    <svg class="controls__chev" width="9" height="6" viewBox="0 0 9 6" aria-hidden="true">
-                        <path d="M0.5 0.5L4.5 4.5L8.5 0.5" stroke="currentColor" stroke-width="1.2" fill="none" />
+                    <span class="controls__select-value">{{
+                        sortOptions.find((o) => o.id === sortMode)?.label
+                    }}</span>
+                    <svg
+                        class="controls__chev"
+                        width="9"
+                        height="6"
+                        viewBox="0 0 9 6"
+                        aria-hidden="true"
+                    >
+                        <path
+                            d="M0.5 0.5L4.5 4.5L8.5 0.5"
+                            stroke="currentColor"
+                            stroke-width="1.2"
+                            fill="none"
+                        />
                     </svg>
-                    <select v-model="sortMode" class="controls__select" aria-label="Sort variables by">
-                        <option v-for="opt in sortOptions" :key="opt.id" :value="opt.id">{{ opt.label }}</option>
+                    <select
+                        v-model="sortMode"
+                        class="controls__select"
+                        aria-label="Sort variables by"
+                    >
+                        <option
+                            v-for="opt in sortOptions"
+                            :key="opt.id"
+                            :value="opt.id"
+                        >
+                            {{ opt.label }}
+                        </option>
                     </select>
                 </span>
             </label>
@@ -138,7 +201,9 @@ const varsBreakdown = computed(() => {
                 class="controls__expand"
                 :disabled="visibleNames.length === 0"
                 @click="toggleExpandAll"
-            >{{ anyExpanded ? 'Collapse all' : 'Expand all' }}</button>
+            >
+                {{ anyExpanded ? 'Collapse all' : 'Expand all' }}
+            </button>
 
             <span v-if="nVarsShown !== nVarsTotal" class="controls__shown">
                 showing {{ nVarsShown }} of {{ nVarsTotal }}
@@ -232,9 +297,10 @@ const varsBreakdown = computed(() => {
     padding: 2px 8px;
     border-radius: 2px;
     cursor: pointer;
-    transition: background var(--dur-fast) var(--ease-snap),
-                color var(--dur-fast) var(--ease-snap),
-                border-color var(--dur-fast) var(--ease-snap);
+    transition:
+        background var(--dur-fast) var(--ease-snap),
+        color var(--dur-fast) var(--ease-snap),
+        border-color var(--dur-fast) var(--ease-snap);
 }
 .controls__chip:hover {
     color: var(--ink);
@@ -252,7 +318,7 @@ const varsBreakdown = computed(() => {
     gap: var(--space-6);
     font-size: var(--type-body);
     color: var(--ink-2);
-    margin-left: auto;     /* push Sort + everything after it to the right */
+    margin-left: auto; /* push Sort + everything after it to the right */
 }
 
 .controls__select-wrap {
@@ -268,14 +334,18 @@ const varsBreakdown = computed(() => {
     background: var(--surface);
     transition: border-color var(--dur-fast) var(--ease-snap);
 }
-.controls__select-wrap:hover { border-color: var(--accent); }
+.controls__select-wrap:hover {
+    border-color: var(--accent);
+}
 .controls__select-wrap:focus-within {
     border-color: var(--accent);
     outline: 2px solid var(--accent-soft);
     outline-offset: -1px;
 }
 
-.controls__select-value { font-weight: 500; }
+.controls__select-value {
+    font-weight: 500;
+}
 
 .controls__chev {
     color: var(--ink-3);
@@ -291,7 +361,6 @@ const varsBreakdown = computed(() => {
     font-family: var(--font-sans);
 }
 
-
 .controls__expand {
     appearance: none;
     background: transparent;
@@ -302,8 +371,9 @@ const varsBreakdown = computed(() => {
     padding: 2px 0;
     cursor: pointer;
     border-bottom: 1px dotted var(--ink-4);
-    transition: color var(--dur-fast) var(--ease-snap),
-                border-color var(--dur-fast) var(--ease-snap);
+    transition:
+        color var(--dur-fast) var(--ease-snap),
+        border-color var(--dur-fast) var(--ease-snap);
 }
 .controls__expand:hover:not(:disabled) {
     color: var(--accent);
@@ -335,7 +405,9 @@ const varsBreakdown = computed(() => {
     flex: 0 0 100%;
     box-sizing: border-box;
 }
-.controls__search:hover { border-color: var(--ink-3); }
+.controls__search:hover {
+    border-color: var(--ink-3);
+}
 .controls__search:focus-within {
     border-color: var(--accent);
     outline: 2px solid var(--accent-soft);
@@ -359,7 +431,9 @@ const varsBreakdown = computed(() => {
     flex: 1;
     min-width: 0;
 }
-.controls__search-input::placeholder { color: var(--ink-4); }
+.controls__search-input::placeholder {
+    color: var(--ink-4);
+}
 
 .controls__search-clear {
     appearance: none;
@@ -372,5 +446,7 @@ const varsBreakdown = computed(() => {
     padding: 0 4px;
     border-radius: 2px;
 }
-.controls__search-clear:hover { color: var(--ink); }
+.controls__search-clear:hover {
+    color: var(--ink);
+}
 </style>

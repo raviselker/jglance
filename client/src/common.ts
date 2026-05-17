@@ -39,7 +39,10 @@ export interface IIdSummary extends IVariableBase {
     samples: string[];
 }
 
-export type IVariableSummary = IContinuousSummary | ICategoricalSummary | IIdSummary;
+export type IVariableSummary =
+    | IContinuousSummary
+    | ICategoricalSummary
+    | IIdSummary;
 
 export interface IOverviewData {
     nRows: number;
@@ -67,10 +70,15 @@ export class PlotStateStore implements IPlotStateStore {
     private readonly storageKey: string;
     private readonly storage: Storage;
 
-    constructor(storageKey: string = 'jglanceState', persistent: boolean = true) {
+    constructor(
+        storageKey: string = 'jglanceState',
+        persistent: boolean = true
+    ) {
         this.storageKey = storageKey;
         /* localStorage survives jamovi sessions; sessionStorage only the tab. */
-        this.storage = persistent ? safeStorage('local') : safeStorage('session');
+        this.storage = persistent
+            ? safeStorage('local')
+            : safeStorage('session');
     }
 
     private read(): JSONObject {
@@ -92,8 +100,7 @@ export class PlotStateStore implements IPlotStateStore {
 
     set(values: { [key: string]: JSONValue }): void {
         const current = this.read();
-        for (const [k, v] of Object.entries(values))
-            current[k] = v;
+        for (const [k, v] of Object.entries(values)) current[k] = v;
         this.write(current);
     }
 
@@ -106,7 +113,8 @@ export class PlotStateStore implements IPlotStateStore {
 /* in-memory fallback if a real Storage isn't available */
 function safeStorage(kind: 'local' | 'session'): Storage {
     try {
-        const s = kind === 'local' ? window.localStorage : window.sessionStorage;
+        const s =
+            kind === 'local' ? window.localStorage : window.sessionStorage;
         const probe = '__jglance_probe__';
         s.setItem(probe, '1');
         s.removeItem(probe);
@@ -114,12 +122,18 @@ function safeStorage(kind: 'local' | 'session'): Storage {
     } catch {
         const mem = new Map<string, string>();
         return {
-            get length() { return mem.size },
+            get length() {
+                return mem.size;
+            },
             clear: () => mem.clear(),
             getItem: (k) => mem.get(k) ?? null,
             key: (i) => Array.from(mem.keys())[i] ?? null,
-            removeItem: (k) => { mem.delete(k) },
-            setItem: (k, v) => { mem.set(k, v) },
-        } as Storage
+            removeItem: (k) => {
+                mem.delete(k);
+            },
+            setItem: (k, v) => {
+                mem.set(k, v);
+            },
+        } as Storage;
     }
 }

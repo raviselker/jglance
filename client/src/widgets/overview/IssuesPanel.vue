@@ -1,94 +1,98 @@
 <script setup lang="ts">
-import { computed, inject, nextTick } from 'vue'
-import type { IOverviewData, IVariableSummary } from '../../common'
-import { OVERVIEW_STATE_KEY, type OverviewState } from '../../composables/useOverviewState'
+import { computed, inject, nextTick } from 'vue';
+import type { IOverviewData, IVariableSummary } from '../../common';
+import {
+    OVERVIEW_STATE_KEY,
+    type OverviewState,
+} from '../../composables/useOverviewState';
 
 const props = defineProps<{
-    data: IOverviewData
-}>()
+    data: IOverviewData;
+}>();
 
-const state = inject<OverviewState>(OVERVIEW_STATE_KEY)!
-const { issuesDismissed } = state
+const state = inject<OverviewState>(OVERVIEW_STATE_KEY)!;
+const { issuesDismissed } = state;
 
 interface IIssue {
-    id: string
-    text: string
-    vars: string[]
+    id: string;
+    text: string;
+    vars: string[];
 }
 
-const MISSING_THRESHOLD = 0.2     /* > 20% missing flagged */
+const MISSING_THRESHOLD = 0.2; /* > 20% missing flagged */
 
 function isHighMissing(v: IVariableSummary, nRows: number): boolean {
-    return nRows > 0 && v.nMissing / nRows > MISSING_THRESHOLD
+    return nRows > 0 && v.nMissing / nRows > MISSING_THRESHOLD;
 }
 
 function isSingleLevel(v: IVariableSummary): boolean {
-    return (v.type === 'nominal' || v.type === 'ordinal') && v.nLevels <= 1
+    return (v.type === 'nominal' || v.type === 'ordinal') && v.nLevels <= 1;
 }
 
 function isConstantContinuous(v: IVariableSummary): boolean {
-    return v.type === 'continuous' && v.n >= 2 && v.sd === 0
+    return v.type === 'continuous' && v.n >= 2 && v.sd === 0;
 }
 
 function isIdLike(v: IVariableSummary, nRows: number): boolean {
     /* Only flag UNMARKED columns that resemble identifiers — columns the
      * user has already typed as ID don't need an "action" callout. */
-    if (v.type !== 'nominal' && v.type !== 'ordinal') return false
-    return nRows >= 10 && v.nLevels >= nRows * 0.95
+    if (v.type !== 'nominal' && v.type !== 'ordinal') return false;
+    return nRows >= 10 && v.nLevels >= nRows * 0.95;
 }
 
 const issues = computed<IIssue[]>(() => {
-    const nRows = props.data.nRows
-    const vars = props.data.variables
-    const result: IIssue[] = []
+    const nRows = props.data.nRows;
+    const vars = props.data.variables;
+    const result: IIssue[] = [];
 
-    const highMissing = vars.filter(v => isHighMissing(v, nRows))
+    const highMissing = vars.filter((v) => isHighMissing(v, nRows));
     if (highMissing.length > 0) {
         result.push({
             id: 'high-missing',
             text: `${highMissing.length} variable${highMissing.length === 1 ? ' has' : 's have'} more than ${MISSING_THRESHOLD * 100}% missing`,
-            vars: highMissing.map(v => v.name),
-        })
+            vars: highMissing.map((v) => v.name),
+        });
     }
 
-    const singleLevel = vars.filter(isSingleLevel)
+    const singleLevel = vars.filter(isSingleLevel);
     if (singleLevel.length > 0) {
         result.push({
             id: 'single-level',
             text: `${singleLevel.length} categorical variable${singleLevel.length === 1 ? '' : 's'} ${singleLevel.length === 1 ? 'has' : 'have'} only one level`,
-            vars: singleLevel.map(v => v.name),
-        })
+            vars: singleLevel.map((v) => v.name),
+        });
     }
 
-    const constant = vars.filter(isConstantContinuous)
+    const constant = vars.filter(isConstantContinuous);
     if (constant.length > 0) {
         result.push({
             id: 'constant',
             text: `${constant.length} continuous variable${constant.length === 1 ? '' : 's'} ${constant.length === 1 ? 'is' : 'are'} constant`,
-            vars: constant.map(v => v.name),
-        })
+            vars: constant.map((v) => v.name),
+        });
     }
 
-    const idLike = vars.filter(v => isIdLike(v, nRows))
+    const idLike = vars.filter((v) => isIdLike(v, nRows));
     if (idLike.length > 0) {
         result.push({
             id: 'id-like',
             text: `${idLike.length} variable${idLike.length === 1 ? ' looks' : 's look'} like identifier${idLike.length === 1 ? '' : 's'} (near-unique values)`,
-            vars: idLike.map(v => v.name),
-        })
+            vars: idLike.map((v) => v.name),
+        });
     }
 
-    return result
-})
+    return result;
+});
 
 function onVarClick(name: string) {
     /* Expand if not already; never collapse from this entry point */
-    if (!state.isExpanded(name))
-        state.toggle(name)
+    if (!state.isExpanded(name)) state.toggle(name);
     nextTick(() => {
-        const row = document.querySelector(`[data-var-name="${CSS.escape(name)}"]`)
-        row?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-    })
+        const row = document.querySelector(
+            `[data-var-name="${CSS.escape(name)}"]`
+        );
+        row?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
 }
 </script>
 
@@ -106,7 +110,9 @@ function onVarClick(name: string) {
                 @click="issuesDismissed = true"
                 aria-label="Dismiss notes"
                 title="Dismiss"
-            >×</button>
+            >
+                ×
+            </button>
         </header>
 
         <ul class="issues__list">
@@ -115,15 +121,27 @@ function onVarClick(name: string) {
                 <span class="issues__text">{{ issue.text }}</span>
                 <span class="issues__vars">
                     <span class="issues__vars-sep">—</span>
-                    <template v-for="(varName, i) in issue.vars.slice(0, 3)" :key="varName">
+                    <template
+                        v-for="(varName, i) in issue.vars.slice(0, 3)"
+                        :key="varName"
+                    >
                         <button
                             type="button"
                             class="issues__var-link"
                             @click="onVarClick(varName)"
-                        >{{ varName }}</button>
-                        <span v-if="i < Math.min(2, issue.vars.length - 1)" class="issues__vars-comma">,</span>
+                        >
+                            {{ varName }}
+                        </button>
+                        <span
+                            v-if="i < Math.min(2, issue.vars.length - 1)"
+                            class="issues__vars-comma"
+                            >,</span
+                        >
                     </template>
-                    <span v-if="issue.vars.length > 3" class="issues__vars-more">
+                    <span
+                        v-if="issue.vars.length > 3"
+                        class="issues__vars-more"
+                    >
                         + {{ issue.vars.length - 3 }} more
                     </span>
                 </span>
@@ -168,8 +186,9 @@ function onVarClick(name: string) {
     line-height: 1;
     padding: 0 4px;
     border-radius: 2px;
-    transition: color var(--dur-fast) var(--ease-snap),
-                background var(--dur-fast) var(--ease-snap);
+    transition:
+        color var(--dur-fast) var(--ease-snap),
+        background var(--dur-fast) var(--ease-snap);
 }
 .issues__close:hover {
     color: var(--ink);
@@ -216,9 +235,17 @@ function onVarClick(name: string) {
     gap: 4px;
     flex-wrap: wrap;
 }
-.issues__vars-sep { color: var(--ink-4); }
-.issues__vars-comma { color: var(--ink-3); margin-left: -3px; }
-.issues__vars-more { color: var(--ink-3); font-style: italic; }
+.issues__vars-sep {
+    color: var(--ink-4);
+}
+.issues__vars-comma {
+    color: var(--ink-3);
+    margin-left: -3px;
+}
+.issues__vars-more {
+    color: var(--ink-3);
+    font-style: italic;
+}
 
 .issues__var-link {
     appearance: none;
@@ -231,8 +258,9 @@ function onVarClick(name: string) {
     cursor: pointer;
     padding: 0;
     border-bottom: 1px dotted var(--ink-4);
-    transition: color var(--dur-fast) var(--ease-snap),
-                border-color var(--dur-fast) var(--ease-snap);
+    transition:
+        color var(--dur-fast) var(--ease-snap),
+        border-color var(--dur-fast) var(--ease-snap);
 }
 .issues__var-link:hover {
     color: var(--accent);

@@ -1,144 +1,187 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import type { IContinuousSummary } from '../../common'
+import { computed } from 'vue';
+import type { IContinuousSummary } from '../../common';
 
 const props = defineProps<{
-    variable: IContinuousSummary
-}>()
+    variable: IContinuousSummary;
+}>();
 
-const HW = 360
-const HH = 110
-const PAD_Y_TOP = 8
-const PAD_Y_BOT = 18
+const HW = 360;
+const HH = 110;
+const PAD_Y_TOP = 8;
+const PAD_Y_BOT = 18;
 
-const baselineY = HH - PAD_Y_BOT
-const tickEndY = baselineY + 5
-const tickMedianEndY = baselineY + 8
+const baselineY = HH - PAD_Y_BOT;
+const tickEndY = baselineY + 5;
+const tickMedianEndY = baselineY + 8;
 
 const bars = computed(() => {
-    const counts = props.variable.histogram.counts
-    if (counts.length === 0) return []
-    const maxC = Math.max(...counts, 1)
-    const usableW = HW
-    const usableH = HH - PAD_Y_TOP - PAD_Y_BOT
-    const barW = usableW / counts.length
+    const counts = props.variable.histogram.counts;
+    if (counts.length === 0) return [];
+    const maxC = Math.max(...counts, 1);
+    const usableW = HW;
+    const usableH = HH - PAD_Y_TOP - PAD_Y_BOT;
+    const barW = usableW / counts.length;
     return counts.map((c, i) => ({
         x: i * barW + 0.5,
         y: HH - PAD_Y_BOT - (c / maxC) * usableH,
         w: Math.max(1, barW - 1),
         h: Math.max(1, (c / maxC) * usableH),
-    }))
-})
+    }));
+});
 
 function xForValue(v: number): number {
-    const lo = props.variable.min
-    const hi = props.variable.max
-    if (hi === lo) return HW / 2
-    return ((v - lo) / (hi - lo)) * HW
+    const lo = props.variable.min;
+    const hi = props.variable.max;
+    if (hi === lo) return HW / 2;
+    return ((v - lo) / (hi - lo)) * HW;
 }
 
 function isBimodalHint(counts: number[]): boolean {
-    if (counts.length < 5) return false
-    const peaks: number[] = []
+    if (counts.length < 5) return false;
+    const peaks: number[] = [];
     for (let i = 1; i < counts.length - 1; i++) {
-        const c = counts[i] ?? 0
-        const prev = counts[i - 1] ?? 0
-        const next = counts[i + 1] ?? 0
-        if (c > prev && c >= next && c > 0) peaks.push(i)
+        const c = counts[i] ?? 0;
+        const prev = counts[i - 1] ?? 0;
+        const next = counts[i + 1] ?? 0;
+        if (c > prev && c >= next && c > 0) peaks.push(i);
     }
-    if (peaks.length < 2) return false
-    peaks.sort((a, b) => (counts[b] ?? 0) - (counts[a] ?? 0))
-    const p1 = peaks[0]!, p2 = peaks[1]!
-    const lo = Math.min(p1, p2), hi = Math.max(p1, p2)
-    if (hi - lo < 2) return false
-    let valley = Infinity
+    if (peaks.length < 2) return false;
+    peaks.sort((a, b) => (counts[b] ?? 0) - (counts[a] ?? 0));
+    const p1 = peaks[0]!,
+        p2 = peaks[1]!;
+    const lo = Math.min(p1, p2),
+        hi = Math.max(p1, p2);
+    if (hi - lo < 2) return false;
+    let valley = Infinity;
     for (let i = lo + 1; i < hi; i++) {
-        const c = counts[i] ?? Infinity
-        if (c < valley) valley = c
+        const c = counts[i] ?? Infinity;
+        if (c < valley) valley = c;
     }
-    const smallerPeak = Math.min(counts[p1] ?? 0, counts[p2] ?? 0)
-    return valley < smallerPeak * 0.5
+    const smallerPeak = Math.min(counts[p1] ?? 0, counts[p2] ?? 0);
+    return valley < smallerPeak * 0.5;
 }
 
 const headline = computed<string | null>(() => {
-    const v = props.variable
-    if (v.n === 0) return null
-    const parts: string[] = []
+    const v = props.variable;
+    if (v.n === 0) return null;
+    const parts: string[] = [];
 
     if (v.n < 5) {
-        parts.push(`only ${v.n} observation${v.n === 1 ? '' : 's'}`)
+        parts.push(`only ${v.n} observation${v.n === 1 ? '' : 's'}`);
     } else if (v.sd === 0 || v.min === v.max) {
-        parts.push(`constant at ${fmt(v.mean)}`)
+        parts.push(`constant at ${fmt(v.mean)}`);
     } else if (
-        v.integer && v.nUnique != null &&
-        v.nUnique <= 7 && v.min >= 0 && v.max <= 10
+        v.integer &&
+        v.nUnique != null &&
+        v.nUnique <= 7 &&
+        v.min >= 0 &&
+        v.max <= 10
     ) {
-        parts.push(`Likert-like (${fmt(v.min)}–${fmt(v.max)}, ${v.nUnique} unique)`)
+        parts.push(
+            `Likert-like (${fmt(v.min)}–${fmt(v.max)}, ${v.nUnique} unique)`
+        );
     } else if (isBimodalHint(v.histogram.counts)) {
-        parts.push('bimodal-suggesting')
+        parts.push('bimodal-suggesting');
     } else {
-        const skew = (3 * (v.mean - v.median)) / v.sd
-        if (skew > 0.5) parts.push('right-skewed')
-        else if (skew < -0.5) parts.push('left-skewed')
-        else parts.push('approximately symmetric')
-        if (v.integer) parts.push('integer-valued')
+        const skew = (3 * (v.mean - v.median)) / v.sd;
+        if (skew > 0.5) parts.push('right-skewed');
+        else if (skew < -0.5) parts.push('left-skewed');
+        else parts.push('approximately symmetric');
+        if (v.integer) parts.push('integer-valued');
     }
 
     if (v.sd > 0 && v.min !== v.max) {
-        parts.push(`range ${fmt(v.min)}–${fmt(v.max)}`)
+        parts.push(`range ${fmt(v.min)}–${fmt(v.max)}`);
     }
 
     if (v.nMissing === 0) {
-        parts.push('no missing')
+        parts.push('no missing');
     } else {
-        const totalN = v.n + v.nMissing
-        const pct = ((v.nMissing / totalN) * 100).toFixed(1)
-        parts.push(`${pct}% missing`)
+        const totalN = v.n + v.nMissing;
+        const pct = ((v.nMissing / totalN) * 100).toFixed(1);
+        parts.push(`${pct}% missing`);
     }
 
-    return parts.join(' · ')
-})
+    return parts.join(' · ');
+});
 
 function fmt(v: number): string {
-    if (v === 0) return '0'
-    const abs = Math.abs(v)
-    if (abs >= 1000) return v.toFixed(0)
-    if (abs >= 100) return v.toFixed(1)
-    if (abs >= 10) return v.toFixed(2)
-    return v.toFixed(3)
+    if (v === 0) return '0';
+    const abs = Math.abs(v);
+    if (abs >= 1000) return v.toFixed(0);
+    if (abs >= 100) return v.toFixed(1);
+    if (abs >= 10) return v.toFixed(2);
+    return v.toFixed(3);
 }
 
 const missingPct = computed(() => {
-    const total = props.variable.n + props.variable.nMissing
-    if (total === 0) return '0%'
-    return ((props.variable.nMissing / total) * 100).toFixed(1) + '%'
-})
+    const total = props.variable.n + props.variable.nMissing;
+    if (total === 0) return '0%';
+    return ((props.variable.nMissing / total) * 100).toFixed(1) + '%';
+});
 </script>
 
 <template>
     <div class="cd">
-        <p v-if="variable.description" class="cd__desc">{{ variable.description }}</p>
+        <p v-if="variable.description" class="cd__desc">
+            {{ variable.description }}
+        </p>
 
         <p v-if="headline" class="cd__headline">{{ headline }}</p>
 
         <div class="cd__hist">
-            <svg :viewBox="`0 0 ${HW} ${HH + 12}`" preserveAspectRatio="none" class="cd__svg" aria-hidden="true">
-                <line :x1="0" :x2="HW" :y1="baselineY" :y2="baselineY" class="cd__baseline" />
-                <rect v-for="(b, i) in bars" :key="i"
-                    :x="b.x" :y="b.y" :width="b.w" :height="b.h"
-                    class="cd__bar" />
+            <svg
+                :viewBox="`0 0 ${HW} ${HH + 12}`"
+                preserveAspectRatio="none"
+                class="cd__svg"
+                aria-hidden="true"
+            >
+                <line
+                    :x1="0"
+                    :x2="HW"
+                    :y1="baselineY"
+                    :y2="baselineY"
+                    class="cd__baseline"
+                />
+                <rect
+                    v-for="(b, i) in bars"
+                    :key="i"
+                    :x="b.x"
+                    :y="b.y"
+                    :width="b.w"
+                    :height="b.h"
+                    class="cd__bar"
+                />
 
                 <!-- quartile ticks below baseline -->
-                <g v-if="variable.q1 !== undefined && variable.q3 !== undefined" class="cd__quart">
+                <g
+                    v-if="
+                        variable.q1 !== undefined && variable.q3 !== undefined
+                    "
+                    class="cd__quart"
+                >
                     <line
-                        :x1="xForValue(variable.q1)" :x2="xForValue(variable.q1)"
-                        :y1="baselineY" :y2="tickEndY" class="cd__quart-tick" />
+                        :x1="xForValue(variable.q1)"
+                        :x2="xForValue(variable.q1)"
+                        :y1="baselineY"
+                        :y2="tickEndY"
+                        class="cd__quart-tick"
+                    />
                     <line
-                        :x1="xForValue(variable.median)" :x2="xForValue(variable.median)"
-                        :y1="baselineY" :y2="tickMedianEndY" class="cd__quart-median" />
+                        :x1="xForValue(variable.median)"
+                        :x2="xForValue(variable.median)"
+                        :y1="baselineY"
+                        :y2="tickMedianEndY"
+                        class="cd__quart-median"
+                    />
                     <line
-                        :x1="xForValue(variable.q3)" :x2="xForValue(variable.q3)"
-                        :y1="baselineY" :y2="tickEndY" class="cd__quart-tick" />
+                        :x1="xForValue(variable.q3)"
+                        :x2="xForValue(variable.q3)"
+                        :y1="baselineY"
+                        :y2="tickEndY"
+                        class="cd__quart-tick"
+                    />
                 </g>
             </svg>
             <div class="cd__axis">

@@ -1,185 +1,288 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>jglance — overview dev harness</title>
-    <style>
-      :root {
-        --stage: #EAEAEA;
-        --stage-ink: #444;
-      }
-      @media (prefers-color-scheme: dark) {
-        :root { --stage: #1A1A1A; --stage-ink: #BBB; }
-      }
-      [data-theme="dark"] { --stage: #1A1A1A; --stage-ink: #BBB; }
-      [data-theme="light"] { --stage: #EAEAEA; --stage-ink: #444; }
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>jglance — overview dev harness</title>
+        <style>
+            :root {
+                --stage: #eaeaea;
+                --stage-ink: #444;
+            }
+            @media (prefers-color-scheme: dark) {
+                :root {
+                    --stage: #1a1a1a;
+                    --stage-ink: #bbb;
+                }
+            }
+            [data-theme='dark'] {
+                --stage: #1a1a1a;
+                --stage-ink: #bbb;
+            }
+            [data-theme='light'] {
+                --stage: #eaeaea;
+                --stage-ink: #444;
+            }
 
-      html, body {
-        background: var(--stage);
-        color: var(--stage-ink);
-        margin: 0;
-        font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-        min-height: 100vh;
-      }
-      .stage {
-        padding: 24px;
-        max-width: 560px;       /* match jamovi's narrow rendering for a realistic preview */
-        margin: 0 auto;
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-      }
-      .stage__meta {
-        display: flex;
-        align-items: baseline;
-        justify-content: space-between;
-        font-size: 11px;
-        opacity: 0.7;
-        padding-bottom: 6px;
-        border-bottom: 1px solid rgba(0,0,0,0.1);
-      }
-      .stage__meta p { margin: 0; }
-      .stage__meta .links { display: flex; gap: 12px; }
-      .stage__meta a { color: inherit; }
-      #root {
-        border: 1px solid rgba(0,0,0,0.1);
-      }
-    </style>
-  </head>
-  <body>
-    <div class="stage">
-      <div class="stage__meta">
-        <p>jglance · overview dev harness</p>
-        <div class="links">
-          <a href="/">← dashboard</a>
+            html,
+            body {
+                background: var(--stage);
+                color: var(--stage-ink);
+                margin: 0;
+                font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+                min-height: 100vh;
+            }
+            .stage {
+                padding: 24px;
+                max-width: 560px; /* match jamovi's narrow rendering for a realistic preview */
+                margin: 0 auto;
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+            }
+            .stage__meta {
+                display: flex;
+                align-items: baseline;
+                justify-content: space-between;
+                font-size: 11px;
+                opacity: 0.7;
+                padding-bottom: 6px;
+                border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            }
+            .stage__meta p {
+                margin: 0;
+            }
+            .stage__meta .links {
+                display: flex;
+                gap: 12px;
+            }
+            .stage__meta a {
+                color: inherit;
+            }
+            #root {
+                border: 1px solid rgba(0, 0, 0, 0.1);
+            }
+        </style>
+    </head>
+    <body>
+        <div class="stage">
+            <div class="stage__meta">
+                <p>jglance · overview dev harness</p>
+                <div class="links">
+                    <a href="/">← dashboard</a>
+                </div>
+            </div>
+            <div id="root"></div>
         </div>
-      </div>
-      <div id="root"></div>
-    </div>
 
-    <script type="module">
-      import { createOverview, PlotStateStore } from '/src/main.ts';
+        <script type="module">
+            import { createOverview, PlotStateStore } from '/src/main.ts';
 
-      /* fixture: a small dataset roughly like mtcars */
-      const data = {
-        nRows: 32,
-        variables: [
-          {
-            name: 'car_id', type: 'id',
-            description: 'Unique identifier for each car in the dataset.',
-            n: 32, nMissing: 0,
-            nUnique: 32,
-            samples: ['Mazda RX4', 'Mazda RX4 Wag', 'Datsun 710', 'Hornet 4 Drive', 'Hornet Sportabout', 'Valiant'],
-          },
-          {
-            name: 'mpg', type: 'continuous',
-            description: 'Miles per gallon — fuel efficiency measured during the EPA test cycle.',
-            n: 32, nMissing: 0,
-            min: 10.4, max: 33.9, mean: 20.09, sd: 6.03, median: 19.2, q1: 15.4, q3: 22.8,
-            histogram: {
-              edges: [10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34],
-              counts: [2, 1, 5, 4, 6, 4, 3, 2, 1, 0, 2, 2],
-            },
-          },
-          {
-            name: 'cyl', type: 'nominal',
-            description: 'Number of engine cylinders.',
-            n: 32, nMissing: 0,
-            nLevels: 3, nTruncated: 0,
-            levels: [
-              { name: '8', count: 14 },
-              { name: '4', count: 11 },
-              { name: '6', count: 7 },
-            ],
-          },
-          {
-            name: 'disp', type: 'continuous',
-            n: 32, nMissing: 0,
-            min: 71.1, max: 472, mean: 230.7, sd: 123.9, median: 196.3, q1: 120.8, q3: 326,
-            histogram: {
-              edges: [50, 100, 150, 200, 250, 300, 350, 400, 450, 500],
-              counts: [6, 5, 6, 3, 2, 4, 4, 1, 1],
-            },
-          },
-          {
-            name: 'hp', type: 'continuous',
-            n: 32, nMissing: 0,
-            min: 52, max: 335, mean: 146.7, sd: 68.6, median: 123, q1: 96.5, q3: 180,
-            histogram: {
-              edges: [50, 100, 150, 200, 250, 300, 350],
-              counts: [9, 9, 8, 4, 1, 1],
-            },
-          },
-          {
-            name: 'gear', type: 'ordinal',
-            n: 30, nMissing: 2,
-            nLevels: 3, nTruncated: 0,
-            levels: [
-              { name: '3', count: 15 },
-              { name: '4', count: 12 },
-              { name: '5', count: 3 },
-            ],
-          },
-          {
-            name: 'wt', type: 'continuous',
-            n: 32, nMissing: 0,
-            min: 1.513, max: 5.424, mean: 3.217, sd: 0.978, median: 3.325, q1: 2.581, q3: 3.61,
-            histogram: {
-              edges: [1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5],
-              counts: [2, 4, 4, 8, 5, 4, 3, 2],
-            },
-          },
-          {
-            name: 'survey_note', type: 'nominal',
-            description: 'Free-text follow-up note submitted by the participant.',
-            n: 4, nMissing: 28,
-            nLevels: 4, nTruncated: 0,
-            levels: [
-              { name: 'unclear instructions', count: 1 },
-              { name: 'too long', count: 1 },
-              { name: 'enjoyed it', count: 1 },
-              { name: 'no comment', count: 1 },
-            ],
-          },
-          {
-            name: 'satisfaction', type: 'continuous',
-            description: 'Self-reported satisfaction on a 1–5 scale.',
-            n: 32, nMissing: 0,
-            min: 1, max: 5, mean: 3.4, sd: 1.1, median: 4, q1: 3, q3: 4,
-            integer: true, nUnique: 5,
-            histogram: {
-              edges: [1, 2, 3, 4, 5, 6],
-              counts: [2, 4, 8, 12, 6],
-            },
-          },
-          {
-            name: 'mileage_split', type: 'continuous',
-            description: 'Highway mileage measured at two different test rigs (bimodal).',
-            n: 32, nMissing: 0,
-            min: 14, max: 36, mean: 24.5, sd: 7.2, median: 25, q1: 17, q3: 31,
-            histogram: {
-              edges: [14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36],
-              counts: [4, 6, 5, 2, 1, 1, 1, 2, 5, 4, 1],
-            },
-          },
-          {
-            name: 'carb_label', type: 'nominal',
-            n: 32, nMissing: 0,
-            nLevels: 6, nTruncated: 0,
-            levels: [
-              { name: 'two', count: 10 },
-              { name: 'four', count: 10 },
-              { name: 'one', count: 7 },
-              { name: 'three', count: 3 },
-              { name: 'six', count: 1 },
-              { name: 'eight', count: 1 },
-            ],
-          },
-        ],
-      };
+            /* fixture: a small dataset roughly like mtcars */
+            const data = {
+                nRows: 32,
+                variables: [
+                    {
+                        name: 'car_id',
+                        type: 'id',
+                        description:
+                            'Unique identifier for each car in the dataset.',
+                        n: 32,
+                        nMissing: 0,
+                        nUnique: 32,
+                        samples: [
+                            'Mazda RX4',
+                            'Mazda RX4 Wag',
+                            'Datsun 710',
+                            'Hornet 4 Drive',
+                            'Hornet Sportabout',
+                            'Valiant',
+                        ],
+                    },
+                    {
+                        name: 'mpg',
+                        type: 'continuous',
+                        description:
+                            'Miles per gallon — fuel efficiency measured during the EPA test cycle.',
+                        n: 32,
+                        nMissing: 0,
+                        min: 10.4,
+                        max: 33.9,
+                        mean: 20.09,
+                        sd: 6.03,
+                        median: 19.2,
+                        q1: 15.4,
+                        q3: 22.8,
+                        histogram: {
+                            edges: [
+                                10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32,
+                                34,
+                            ],
+                            counts: [2, 1, 5, 4, 6, 4, 3, 2, 1, 0, 2, 2],
+                        },
+                    },
+                    {
+                        name: 'cyl',
+                        type: 'nominal',
+                        description: 'Number of engine cylinders.',
+                        n: 32,
+                        nMissing: 0,
+                        nLevels: 3,
+                        nTruncated: 0,
+                        levels: [
+                            { name: '8', count: 14 },
+                            { name: '4', count: 11 },
+                            { name: '6', count: 7 },
+                        ],
+                    },
+                    {
+                        name: 'disp',
+                        type: 'continuous',
+                        n: 32,
+                        nMissing: 0,
+                        min: 71.1,
+                        max: 472,
+                        mean: 230.7,
+                        sd: 123.9,
+                        median: 196.3,
+                        q1: 120.8,
+                        q3: 326,
+                        histogram: {
+                            edges: [
+                                50, 100, 150, 200, 250, 300, 350, 400, 450, 500,
+                            ],
+                            counts: [6, 5, 6, 3, 2, 4, 4, 1, 1],
+                        },
+                    },
+                    {
+                        name: 'hp',
+                        type: 'continuous',
+                        n: 32,
+                        nMissing: 0,
+                        min: 52,
+                        max: 335,
+                        mean: 146.7,
+                        sd: 68.6,
+                        median: 123,
+                        q1: 96.5,
+                        q3: 180,
+                        histogram: {
+                            edges: [50, 100, 150, 200, 250, 300, 350],
+                            counts: [9, 9, 8, 4, 1, 1],
+                        },
+                    },
+                    {
+                        name: 'gear',
+                        type: 'ordinal',
+                        n: 30,
+                        nMissing: 2,
+                        nLevels: 3,
+                        nTruncated: 0,
+                        levels: [
+                            { name: '3', count: 15 },
+                            { name: '4', count: 12 },
+                            { name: '5', count: 3 },
+                        ],
+                    },
+                    {
+                        name: 'wt',
+                        type: 'continuous',
+                        n: 32,
+                        nMissing: 0,
+                        min: 1.513,
+                        max: 5.424,
+                        mean: 3.217,
+                        sd: 0.978,
+                        median: 3.325,
+                        q1: 2.581,
+                        q3: 3.61,
+                        histogram: {
+                            edges: [1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5],
+                            counts: [2, 4, 4, 8, 5, 4, 3, 2],
+                        },
+                    },
+                    {
+                        name: 'survey_note',
+                        type: 'nominal',
+                        description:
+                            'Free-text follow-up note submitted by the participant.',
+                        n: 4,
+                        nMissing: 28,
+                        nLevels: 4,
+                        nTruncated: 0,
+                        levels: [
+                            { name: 'unclear instructions', count: 1 },
+                            { name: 'too long', count: 1 },
+                            { name: 'enjoyed it', count: 1 },
+                            { name: 'no comment', count: 1 },
+                        ],
+                    },
+                    {
+                        name: 'satisfaction',
+                        type: 'continuous',
+                        description:
+                            'Self-reported satisfaction on a 1–5 scale.',
+                        n: 32,
+                        nMissing: 0,
+                        min: 1,
+                        max: 5,
+                        mean: 3.4,
+                        sd: 1.1,
+                        median: 4,
+                        q1: 3,
+                        q3: 4,
+                        integer: true,
+                        nUnique: 5,
+                        histogram: {
+                            edges: [1, 2, 3, 4, 5, 6],
+                            counts: [2, 4, 8, 12, 6],
+                        },
+                    },
+                    {
+                        name: 'mileage_split',
+                        type: 'continuous',
+                        description:
+                            'Highway mileage measured at two different test rigs (bimodal).',
+                        n: 32,
+                        nMissing: 0,
+                        min: 14,
+                        max: 36,
+                        mean: 24.5,
+                        sd: 7.2,
+                        median: 25,
+                        q1: 17,
+                        q3: 31,
+                        histogram: {
+                            edges: [
+                                14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36,
+                            ],
+                            counts: [4, 6, 5, 2, 1, 1, 1, 2, 5, 4, 1],
+                        },
+                    },
+                    {
+                        name: 'carb_label',
+                        type: 'nominal',
+                        n: 32,
+                        nMissing: 0,
+                        nLevels: 6,
+                        nTruncated: 0,
+                        levels: [
+                            { name: 'two', count: 10 },
+                            { name: 'four', count: 10 },
+                            { name: 'one', count: 7 },
+                            { name: 'three', count: 3 },
+                            { name: 'six', count: 1 },
+                            { name: 'eight', count: 1 },
+                        ],
+                    },
+                ],
+            };
 
-      createOverview('#root', data, new PlotStateStore('jglance-overview-dev'));
-    </script>
-  </body>
+            createOverview(
+                '#root',
+                data,
+                new PlotStateStore('jglance-overview-dev')
+            );
+        </script>
+    </body>
 </html>

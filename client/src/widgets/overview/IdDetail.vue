@@ -1,35 +1,45 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import type { IIdSummary } from '../../common'
+import { computed } from 'vue';
+import type { IIdSummary } from '../../common';
 
 const props = defineProps<{
-    variable: IIdSummary
-}>()
+    variable: IIdSummary;
+}>();
 
 const missingPct = computed(() => {
-    const total = props.variable.n + props.variable.nMissing
-    if (total === 0) return '0%'
-    return ((props.variable.nMissing / total) * 100).toFixed(1) + '%'
-})
+    const total = props.variable.n + props.variable.nMissing;
+    if (total === 0) return '0%';
+    return ((props.variable.nMissing / total) * 100).toFixed(1) + '%';
+});
 
-const samplesShown = computed(() => props.variable.samples.slice(0, 6))
-const moreSamples = computed(() => Math.max(0, props.variable.samples.length - 6))
+const samplesShown = computed(() => props.variable.samples.slice(0, 6));
+const moreSamples = computed(() =>
+    Math.max(0, props.variable.samples.length - 6)
+);
 </script>
 
 <template>
     <div class="id">
-        <p v-if="variable.description" class="id__desc">{{ variable.description }}</p>
+        <p v-if="variable.description" class="id__desc">
+            {{ variable.description }}
+        </p>
 
         <p class="id__headline">
-            Identifier column · {{ variable.nUnique }} unique value{{ variable.nUnique === 1 ? '' : 's' }}
-            <template v-if="variable.nMissing > 0"> · {{ missingPct }} missing</template>
+            Identifier column · {{ variable.nUnique }} unique value{{
+                variable.nUnique === 1 ? '' : 's'
+            }}
+            <template v-if="variable.nMissing > 0">
+                · {{ missingPct }} missing</template
+            >
         </p>
 
         <div class="id__samples" v-if="samplesShown.length > 0">
             <p class="id__samples-label">Examples</p>
             <ul class="id__samples-list">
                 <li v-for="s in samplesShown" :key="s">{{ s }}</li>
-                <li v-if="moreSamples > 0" class="id__samples-more">+ {{ moreSamples }} more</li>
+                <li v-if="moreSamples > 0" class="id__samples-more">
+                    + {{ moreSamples }} more
+                </li>
             </ul>
         </div>
 

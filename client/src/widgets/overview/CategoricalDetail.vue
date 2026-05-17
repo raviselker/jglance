@@ -1,75 +1,89 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import type { ICategoricalSummary } from '../../common'
+import { computed } from 'vue';
+import type { ICategoricalSummary } from '../../common';
 
 const props = defineProps<{
-    variable: ICategoricalSummary
-}>()
+    variable: ICategoricalSummary;
+}>();
 
-const maxCount = computed(() => Math.max(...props.variable.levels.map(l => l.count), 1))
+const maxCount = computed(() =>
+    Math.max(...props.variable.levels.map((l) => l.count), 1)
+);
 
 const modeLevel = computed(() => {
-    if (props.variable.levels.length === 0) return null
+    if (props.variable.levels.length === 0) return null;
     return props.variable.levels.reduce(
-        (best, l) => l.count > best.count ? l : best,
-        props.variable.levels[0]!,
-    )
-})
+        (best, l) => (l.count > best.count ? l : best),
+        props.variable.levels[0]!
+    );
+});
 
-const modeLabel = computed(() => modeLevel.value?.name ?? '—')
+const modeLabel = computed(() => modeLevel.value?.name ?? '—');
 
 const missingPct = computed(() => {
-    const total = props.variable.n + props.variable.nMissing
-    if (total === 0) return '0%'
-    return ((props.variable.nMissing / total) * 100).toFixed(1) + '%'
-})
+    const total = props.variable.n + props.variable.nMissing;
+    if (total === 0) return '0%';
+    return ((props.variable.nMissing / total) * 100).toFixed(1) + '%';
+});
 
 const headline = computed<string | null>(() => {
-    const v = props.variable
-    if (v.nLevels === 0) return null
-    const parts: string[] = []
+    const v = props.variable;
+    if (v.nLevels === 0) return null;
+    const parts: string[] = [];
 
     if (v.nLevels === 1) {
-        parts.push(`single level: ${v.levels[0]?.name ?? '—'}`)
+        parts.push(`single level: ${v.levels[0]?.name ?? '—'}`);
     } else {
-        parts.push(`${v.nLevels} level${v.nLevels === 1 ? '' : 's'}`)
-        const mode = modeLevel.value
+        parts.push(`${v.nLevels} level${v.nLevels === 1 ? '' : 's'}`);
+        const mode = modeLevel.value;
         if (mode && v.n > 0) {
-            const pct = Math.round((mode.count / v.n) * 100)
-            parts.push(`dominant: ${mode.name} (${pct}%)`)
+            const pct = Math.round((mode.count / v.n) * 100);
+            parts.push(`dominant: ${mode.name} (${pct}%)`);
         }
     }
 
     if (v.nMissing === 0) {
-        parts.push('no missing')
+        parts.push('no missing');
     } else {
-        const totalN = v.n + v.nMissing
-        const pct = ((v.nMissing / totalN) * 100).toFixed(1)
-        parts.push(`${pct}% missing`)
+        const totalN = v.n + v.nMissing;
+        const pct = ((v.nMissing / totalN) * 100).toFixed(1);
+        parts.push(`${pct}% missing`);
     }
 
-    return parts.join(' · ')
-})
+    return parts.join(' · ');
+});
 </script>
 
 <template>
     <div class="cat">
-        <p v-if="variable.description" class="cat__desc">{{ variable.description }}</p>
+        <p v-if="variable.description" class="cat__desc">
+            {{ variable.description }}
+        </p>
 
         <p v-if="headline" class="cat__headline">{{ headline }}</p>
 
         <ul class="cat__levels">
-            <li v-for="lvl in variable.levels" :key="lvl.name" class="cat__level">
+            <li
+                v-for="lvl in variable.levels"
+                :key="lvl.name"
+                class="cat__level"
+            >
                 <span class="cat__level-name">{{ lvl.name }}</span>
                 <div class="cat__bar-track">
-                    <div class="cat__bar" :style="`width: ${(lvl.count / maxCount) * 100}%`"></div>
+                    <div
+                        class="cat__bar"
+                        :style="`width: ${(lvl.count / maxCount) * 100}%`"
+                    ></div>
                 </div>
                 <span class="cat__level-count">{{ lvl.count }}</span>
             </li>
         </ul>
 
         <p v-if="variable.nTruncated > 0" class="cat__more">
-            + {{ variable.nTruncated }} more level{{ variable.nTruncated === 1 ? '' : 's' }} not shown
+            + {{ variable.nTruncated }} more level{{
+                variable.nTruncated === 1 ? '' : 's'
+            }}
+            not shown
         </p>
 
         <dl class="cat__stats">
