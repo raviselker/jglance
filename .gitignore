@@ -1,0 +1,12 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+build/
+inst/
+node_modules/
+.DS_Store
+.geminiignore
+client/dist/
+*.jmo
+R/*.h.R
