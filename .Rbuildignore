@@ -1,0 +1,13 @@
+^client$
+^scripts$
+^build$
+^.*\.Rproj$
+^\.Rproj\.user$
+^\.vscode$
+^node_modules$
+^README\.md$
+^CLAUDE\.md$
+^GEMINI\.md$
+^\.geminiignore$
+^demo$
+^.*\.jmo$
