@@ -11,6 +11,7 @@ A jamovi module rendering an interactive **Data Overview** analysis. R6 analysis
 
 ### Development & Build
 - `cd client && npm run dev`: Local UI development with fixture data (Vite dev server).
+- `./scripts/format.sh`: Formats R code (air) and client code (prettier).
 - `./scripts/build-and-install.sh`: Full build (client + R) and installation into jamovi.
 - `./scripts/install-module.sh`: R-only installation (yaml + R code changes).
 - `Rscript scripts/generate-demo-data.R`: Regenerate demo datasets in `demo/`.

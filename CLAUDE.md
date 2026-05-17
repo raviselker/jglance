@@ -50,6 +50,12 @@ Generated artifacts (don't edit, don't commit):
 
 ## Dev cycle
 
+**Formatting**:
+```bash
+./scripts/format.sh
+```
+Runs `air format` on R code and `prettier` on the client.
+
 **Iterating on the UI** (fast — no R or jamovi needed):
 ```bash
 cd client
