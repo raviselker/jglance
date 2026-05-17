@@ -13,7 +13,7 @@ children:
       - id
     children:
       - type: TargetLayoutBox
-        label: Variables (optional)
+        label: Variables
         children:
           - type: VariablesListBox
             name: vars

@@ -11,7 +11,7 @@ options:
       type: Data
 
     - name: vars
-      title: Variables (optional)
+      title: Variables
       type: Variables
       default: ~
       takeFromDataIfMissing: true
