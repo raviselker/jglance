@@ -155,6 +155,7 @@ function previewStat(v: IVariableSummary): string {
                     >{{ item.count }}
                     {{ item.count === 1 ? 'var' : 'vars' }}</span
                 >
+                <span class="list__group-missing">Missing</span>
             </li>
             <li
                 v-else
@@ -200,6 +201,13 @@ function previewStat(v: IVariableSummary): string {
                     <span
                         class="row__missing"
                         :class="{ 'is-warn': item.variable.nMissing > 0 }"
+                        :title="
+                            item.variable.nMissing === 0
+                                ? 'No missing values'
+                                : `${missingPct(item.variable).toFixed(
+                                      1
+                                  )}% missing (${item.variable.nMissing} cells)`
+                        "
                     >
                         <template v-if="item.variable.nMissing === 0"
                             >—</template
@@ -287,6 +295,16 @@ function previewStat(v: IVariableSummary): string {
 .list__group-count {
     color: var(--ink-4);
     font-weight: 500;
+}
+.list__group-missing {
+    margin-left: auto;
+    font-size: var(--type-helper);
+    color: var(--ink-4);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+    width: 44px;
+    text-align: right;
 }
 
 .row {
