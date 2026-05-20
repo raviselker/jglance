@@ -19,6 +19,23 @@ const selectedTarget = ref(
 );
 const expandedVars = ref<Set<string>>(new Set());
 const showDropdown = ref(false);
+
+type SortMode = 'strength' | 'name' | 'type' | 'original';
+const sortMode = ref<SortMode>('strength');
+const sortOptions: { id: SortMode; label: string }[] = [
+    { id: 'strength', label: 'Effect strength' },
+    { id: 'name', label: 'Name' },
+    { id: 'type', label: 'Type' },
+    { id: 'original', label: 'Original order' },
+];
+
+type TypeFilter = 'all' | 'continuous' | 'categorical';
+const typeFilter = ref<TypeFilter>('all');
+const typeOptions: { id: TypeFilter; label: string }[] = [
+    { id: 'all', label: 'All' },
+    { id: 'continuous', label: 'Continuous' },
+    { id: 'categorical', label: 'Categorical' },
+];
 const dropdownSearch = ref('');
 const searchInputRef = ref<HTMLInputElement | null>(null);
 
@@ -91,13 +108,84 @@ const filteredDropdownVars = computed(() => {
     );
 });
 
+const TYPE_ORDER: Record<VariableType, number> = {
+    continuous: 0,
+    nominal: 1,
+    ordinal: 2,
+    id: 3,
+};
+
 const predictors = computed(() => {
     if (!selectedTarget.value) return [];
     const assocs = (props.data.associations ?? {})[selectedTarget.value] ?? {};
-    return props.data.variables
+    let vars = props.data.variables
         .filter((v) => v.name !== selectedTarget.value)
-        .map((v) => ({ ...v, association: assocs[v.name] ?? 0 }))
-        .sort((a, b) => b.association - a.association);
+        .map((v) => ({ ...v, association: assocs[v.name] ?? 0 }));
+    if (typeFilter.value === 'continuous') {
+        vars = vars.filter((v) => v.type === 'continuous');
+    } else if (typeFilter.value === 'categorical') {
+        vars = vars.filter((v) => v.type !== 'continuous');
+    }
+    switch (sortMode.value) {
+        case 'name':
+            return [...vars].sort((a, b) => a.name.localeCompare(b.name));
+        case 'type':
+            return [...vars].sort(
+                (a, b) =>
+                    TYPE_ORDER[a.type] - TYPE_ORDER[b.type] ||
+                    b.association - a.association
+            );
+        case 'original':
+            return vars;
+        default:
+            return [...vars].sort((a, b) => b.association - a.association);
+    }
+});
+
+function typeGroupLabel(t: VariableType): string {
+    const labels: Record<VariableType, string> = {
+        continuous: 'Continuous',
+        nominal: 'Nominal',
+        ordinal: 'Ordinal',
+        id: 'Identifier',
+    };
+    return labels[t];
+}
+
+type PredictorItem =
+    | { kind: 'colheader'; key: string }
+    | { kind: 'header'; key: string; label: string; count: number }
+    | {
+          kind: 'row';
+          key: string;
+          name: string;
+          description: string | null;
+          type: VariableType;
+          association: number;
+      };
+
+const predictorItems = computed((): PredictorItem[] => {
+    const sorted = predictors.value;
+    if (sortMode.value !== 'type') {
+        const rows = sorted.map((p) => ({ kind: 'row' as const, key: p.name, ...p }));
+        return [{ kind: 'colheader', key: 'colheader' }, ...rows];
+    }
+    const items: PredictorItem[] = [];
+    let lastType: VariableType | null = null;
+    for (const p of sorted) {
+        if (p.type !== lastType) {
+            const count = sorted.filter((x) => x.type === p.type).length;
+            items.push({
+                kind: 'header',
+                key: `header-${p.type}`,
+                label: typeGroupLabel(p.type),
+                count,
+            });
+            lastType = p.type;
+        }
+        items.push({ kind: 'row', key: p.name, ...p });
+    }
+    return items;
 });
 
 const associationBreakdown = computed(() => {
@@ -337,82 +425,141 @@ function fmt(v: number): string {
 
             <!-- ── Association list ── -->
             <div class="assoc-container">
-                <div class="assoc-header">
-                    <span class="assoc-header__title">Associations</span>
-                    <div class="assoc-header__right">
+                <div class="assoc-controls">
+                    <div class="controls__group">
                         <button
+                            v-for="opt in typeOptions"
+                            :key="opt.id"
                             type="button"
-                            class="assoc-expand-btn"
-                            :disabled="predictors.length === 0"
-                            @click="anyExpanded ? collapseAll() : expandAll()"
+                            class="controls__chip"
+                            :class="{ 'is-active': typeFilter === opt.id }"
+                            @click="typeFilter = opt.id"
                         >
-                            {{ anyExpanded ? 'Collapse all' : 'Expand all' }}
+                            {{ opt.label }}
                         </button>
-                        <span class="assoc-header__sort">Sorted by strength</span>
                     </div>
+                    <label class="controls__sort">
+                        <span class="controls__label">Sort:</span>
+                        <span class="controls__select-wrap">
+                            <span class="controls__select-value">{{
+                                sortOptions.find((o) => o.id === sortMode)
+                                    ?.label
+                            }}</span>
+                            <svg
+                                class="controls__chev"
+                                width="9"
+                                height="6"
+                                viewBox="0 0 9 6"
+                                aria-hidden="true"
+                            >
+                                <path
+                                    d="M0.5 0.5L4.5 4.5L8.5 0.5"
+                                    stroke="currentColor"
+                                    stroke-width="1.2"
+                                    fill="none"
+                                />
+                            </svg>
+                            <select
+                                v-model="sortMode"
+                                class="controls__select"
+                                aria-label="Sort associations by"
+                            >
+                                <option
+                                    v-for="opt in sortOptions"
+                                    :key="opt.id"
+                                    :value="opt.id"
+                                >
+                                    {{ opt.label }}
+                                </option>
+                            </select>
+                        </span>
+                    </label>
+                    <button
+                        type="button"
+                        class="assoc-expand-btn"
+                        :disabled="predictors.length === 0"
+                        @click="anyExpanded ? collapseAll() : expandAll()"
+                    >
+                        {{ anyExpanded ? 'Collapse all' : 'Expand all' }}
+                    </button>
                 </div>
                 <ul class="assoc-list">
-                    <li
-                        v-for="p in predictors"
-                        :key="p.name"
-                        class="assoc-item"
-                        :class="{ 'is-expanded': expandedVars.has(p.name) }"
-                    >
-                        <button
-                            type="button"
-                            class="assoc-row"
-                            :class="{ 'is-selected': expandedVars.has(p.name) }"
-                            @click="toggleExpand(p.name)"
-                            :aria-expanded="expandedVars.has(p.name)"
-                        >
-                            <!-- Main grid row -->
-                            <span
-                                class="type-dot"
-                                :class="`is-${p.type}`"
-                                aria-hidden="true"
-                            ></span>
-                            <span class="assoc-row__name">{{ p.name }}</span>
-                            <span class="assoc-row__type">{{
-                                typeLabel(p.type)
-                            }}</span>
-                            <div class="assoc-row__right">
-                                <span class="assoc-row__stat">{{
-                                    statLabel(targetVar!.type, p.type)
-                                }}</span>
-                                <span class="assoc-row__value">{{
-                                    fmt(p.association)
-                                }}</span>
-                            </div>
-                            <!-- Thin bar below the grid -->
-                            <div class="assoc-row__bar-track">
-                                <div
-                                    class="assoc-row__bar-fill"
-                                    :style="{
-                                        width: `${p.association * 100}%`,
-                                        background: typeColor(p.type),
-                                    }"
-                                ></div>
-                            </div>
-                        </button>
+                    <template v-for="item in predictorItems" :key="item.key">
+                        <!-- Column header (non-type sorts) -->
+                        <li v-if="item.kind === 'colheader'" class="assoc-colheader" aria-hidden="true">
+                            <span class="assoc-colheader__var">Variable</span>
+                            <span class="assoc-colheader__effect">Effect size</span>
+                        </li>
 
-                        <Transition name="detail">
-                            <div
-                                v-if="expandedVars.has(p.name) && pairDetail(p.name)"
-                                class="assoc-detail"
+                        <!-- Type group heading -->
+                        <li v-else-if="item.kind === 'header'" class="assoc-group">
+                            <span class="assoc-group__label">{{ item.label }}</span>
+                            <span class="assoc-group__count">{{ item.count }} {{ item.count === 1 ? 'var' : 'vars' }}</span>
+                            <span class="assoc-group__effect">Effect size</span>
+                        </li>
+
+                        <!-- Variable row -->
+                        <li
+                            v-else-if="item.kind === 'row'"
+                            class="assoc-item"
+                            :class="{ 'is-expanded': expandedVars.has(item.name) }"
+                        >
+                            <button
+                                type="button"
+                                class="assoc-row"
+                                :class="{ 'is-selected': expandedVars.has(item.name) }"
+                                @click="toggleExpand(item.name)"
+                                :aria-expanded="expandedVars.has(item.name)"
                             >
-                                <p class="assoc-detail__title">
-                                    {{ p.name }} × {{ selectedTarget }}
-                                    <span class="assoc-detail__stat">
-                                        ·
-                                        {{ statLabel(targetVar!.type, p.type) }}
-                                        =
-                                        {{ fmt(p.association) }}
-                                    </span>
-                                </p>
-                                <MiniPlot :detail="pairDetail(p.name)!" />
-                            </div>
-                        </Transition>
-                    </li>
+                                <!-- Main grid row -->
+                                <span
+                                    class="type-dot"
+                                    :class="`is-${item.type}`"
+                                    aria-hidden="true"
+                                ></span>
+                                <span class="assoc-row__name">{{ item.name }}</span>
+                                <span class="assoc-row__type">{{
+                                    typeLabel(item.type)
+                                }}</span>
+                                <div class="assoc-row__right">
+                                    <span class="assoc-row__stat">{{
+                                        statLabel(targetVar!.type, item.type)
+                                    }}</span>
+                                    <span class="assoc-row__value">{{
+                                        fmt(item.association)
+                                    }}</span>
+                                </div>
+                                <!-- Thin bar below the grid -->
+                                <div class="assoc-row__bar-track">
+                                    <div
+                                        class="assoc-row__bar-fill"
+                                        :style="{
+                                            width: `${item.association * 100}%`,
+                                            background: typeColor(item.type),
+                                        }"
+                                    ></div>
+                                </div>
+                            </button>
+
+                            <Transition name="detail">
+                                <div
+                                    v-if="expandedVars.has(item.name) && pairDetail(item.name)"
+                                    class="assoc-detail"
+                                >
+                                    <p class="assoc-detail__title">
+                                        {{ item.name }} × {{ selectedTarget }}
+                                        <span class="assoc-detail__stat">
+                                            ·
+                                            {{ statLabel(targetVar!.type, item.type) }}
+                                            =
+                                            {{ fmt(item.association) }}
+                                        </span>
+                                    </p>
+                                    <MiniPlot :detail="pairDetail(item.name)!" />
+                                </div>
+                            </Transition>
+                        </li>
+                    </template>
                 </ul>
             </div>
         </div>
@@ -676,19 +823,100 @@ function fmt(v: number): string {
 
 
 /* ── Association list ── */
-.assoc-header {
+/* ── Association controls bar ── */
+.assoc-controls {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    align-items: baseline;
+    gap: var(--space-12);
     margin-top: var(--space-12);
-    margin-bottom: var(--space-8);
+    margin-bottom: var(--space-12);
     padding: 0 var(--space-4);
 }
 
-.assoc-header__right {
-    display: flex;
-    align-items: center;
-    gap: var(--space-12);
+.controls__group {
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--space-6);
+}
+
+.controls__chip {
+    appearance: none;
+    background: transparent;
+    border: 1px solid var(--rule);
+    color: var(--ink-2);
+    font: inherit;
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 2px;
+    cursor: pointer;
+    transition:
+        background var(--dur-fast) var(--ease-snap),
+        color var(--dur-fast) var(--ease-snap),
+        border-color var(--dur-fast) var(--ease-snap);
+}
+.controls__chip:hover {
+    color: var(--ink);
+    border-color: var(--ink-3);
+}
+.controls__chip.is-active {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+}
+
+/* Sort control — copied from Overview's .controls__sort */
+.controls__sort {
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--space-6);
+    font-size: var(--type-body);
+    color: var(--ink-2);
+    margin-left: auto;
+}
+
+.controls__label {
+    color: var(--ink-3);
+    font-size: var(--type-helper);
+}
+
+.controls__select-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+    color: var(--ink);
+    cursor: pointer;
+    padding: 2px 8px 2px 6px;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    background: var(--surface);
+    transition: border-color var(--dur-fast) var(--ease-snap);
+}
+.controls__select-wrap:hover {
+    border-color: var(--accent);
+}
+.controls__select-wrap:focus-within {
+    border-color: var(--accent);
+    outline: 2px solid var(--accent-soft);
+    outline-offset: -1px;
+}
+
+.controls__select-value {
+    font-weight: 500;
+}
+
+.controls__chev {
+    color: var(--ink-3);
+    transform: translateY(-1px);
+}
+
+.controls__select {
+    position: absolute;
+    inset: -2px -4px;
+    width: calc(100% + 8px);
+    opacity: 0;
+    cursor: pointer;
+    font-family: var(--font-sans);
 }
 
 .assoc-expand-btn {
@@ -712,28 +940,6 @@ function fmt(v: number): string {
 .assoc-expand-btn:disabled {
     opacity: 0.4;
     cursor: not-allowed;
-}
-
-.assoc-header__title {
-    font-size: var(--type-eyebrow);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--ink-3);
-}
-
-.assoc-header__sort {
-    font-size: var(--type-helper);
-    color: var(--ink-4);
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.assoc-header__sort::before {
-    content: '↓';
-    font-weight: bold;
-    color: var(--ink-4);
 }
 
 .assoc-list {
@@ -803,10 +1009,11 @@ function fmt(v: number): string {
 .assoc-row {
     display: grid;
     grid-template-columns: 8px minmax(0, 1fr) auto auto;
-    grid-template-rows: auto 3px;
+    grid-template-rows: auto;
     align-items: center;
     gap: 0 var(--space-12);
-    padding: var(--space-8) var(--space-12) 0;
+    padding: var(--space-8) var(--space-12);
+    position: relative;
 }
 
 .assoc-row > .type-dot {
@@ -838,11 +1045,12 @@ function fmt(v: number): string {
     gap: var(--space-4);
 }
 .assoc-row__bar-track {
-    grid-column: 1 / -1;
-    grid-row: 2;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
     height: 3px;
     background: var(--rule-soft);
-    margin-top: var(--space-6);
 }
 
 .assoc-row__stat {
@@ -885,6 +1093,70 @@ function fmt(v: number): string {
 .assoc-detail__stat {
     font-weight: 400;
     color: var(--ink-4);
+}
+
+/* ── Column header (non-type sort) ── */
+.assoc-colheader {
+    display: grid;
+    grid-template-columns: 8px minmax(0, 1fr) auto auto;
+    align-items: baseline;
+    gap: 0 var(--space-12);
+    padding: var(--space-6) var(--space-12) var(--space-4);
+    font-size: var(--type-eyebrow);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    color: var(--ink-3);
+    list-style: none;
+}
+
+.assoc-colheader__var {
+    grid-column: 1 / 4;
+    color: var(--ink-2);
+}
+
+.assoc-colheader__effect {
+    grid-column: 4;
+    text-align: right;
+    color: var(--ink-4);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+}
+
+/* ── Type group headings (shown when sorted by type) ── */
+.assoc-group {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-8);
+    padding: var(--space-16) var(--space-12) var(--space-4);
+    font-size: var(--type-eyebrow);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    color: var(--ink-3);
+    list-style: none;
+}
+
+.assoc-group:first-child {
+    padding-top: var(--space-6);
+}
+
+.assoc-group__label {
+    color: var(--ink-2);
+}
+
+.assoc-group__count {
+    color: var(--ink-4);
+    font-weight: 500;
+}
+
+.assoc-group__effect {
+    margin-left: auto;
+    font-size: var(--type-helper);
+    color: var(--ink-4);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
 }
 
 /* ── Expand/collapse animation ── */

@@ -19,6 +19,7 @@ const props = defineProps<{
 const state = inject<OverviewState>(OVERVIEW_STATE_KEY)!;
 
 type Item =
+    | { kind: 'colheader'; key: string }
     | { kind: 'header'; key: string; label: string; count: number }
     | { kind: 'row'; key: string; variable: IVariableSummary };
 
@@ -33,11 +34,14 @@ function typeGroupLabel(t: string): string {
 const itemsWithHeaders = computed<Item[]>(() => {
     const vars = props.variables;
     if (state.sortMode.value !== 'type' || vars.length === 0) {
-        return vars.map((v) => ({
+        const rows = vars.map((v) => ({
             kind: 'row' as const,
             key: v.name,
             variable: v,
         }));
+        return vars.length > 0
+            ? [{ kind: 'colheader' as const, key: 'colheader' }, ...rows]
+            : rows;
     }
 
     const result: Item[] = [];
@@ -145,8 +149,12 @@ function previewStat(v: IVariableSummary): string {
 <template>
     <ul ref="listRef" class="list" v-if="variables.length > 0">
         <template v-for="item in itemsWithHeaders" :key="item.key">
+            <li v-if="item.kind === 'colheader'" class="list__colheader" aria-hidden="true">
+                <span class="list__colheader__var">Variable</span>
+                <span class="list__colheader__missing">Missing</span>
+            </li>
             <li
-                v-if="item.kind === 'header'"
+                v-else-if="item.kind === 'header'"
                 class="list__group"
                 :aria-hidden="true"
             >
@@ -158,7 +166,7 @@ function previewStat(v: IVariableSummary): string {
                 <span class="list__group-missing">Missing</span>
             </li>
             <li
-                v-else
+                v-else-if="item.kind === 'row'"
                 class="list__item"
                 :class="{ 'is-expanded': state.isExpanded(item.variable.name) }"
                 :data-var-name="item.variable.name"
@@ -272,6 +280,33 @@ function previewStat(v: IVariableSummary): string {
 }
 .list__item.is-expanded + .list__item.is-expanded {
     margin-top: 0; /* avoid double gap when stacked */
+}
+
+.list__colheader {
+    display: grid;
+    grid-template-columns: 8px minmax(0, 1fr) auto 78px 44px;
+    align-items: baseline;
+    gap: var(--space-12);
+    padding: var(--space-6) var(--space-12) var(--space-4);
+    font-size: var(--type-eyebrow);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    color: var(--ink-3);
+}
+
+.list__colheader__var {
+    grid-column: 1 / 4;
+    color: var(--ink-2);
+}
+
+.list__colheader__missing {
+    grid-column: 5;
+    text-align: right;
+    color: var(--ink-4);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    width: 44px;
 }
 
 .list__group {
