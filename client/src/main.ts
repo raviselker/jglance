@@ -3,8 +3,9 @@ import { createApp } from 'vue';
 import './tokens.css';
 
 import Overview from './Overview.vue';
+import Relations from './Relations.vue';
 import { PlotStateStore } from './common';
-import type { IOverviewData, IPlotStateStore } from './common';
+import type { IOverviewData, IRelationsData, IPlotStateStore } from './common';
 
 function createOverview(
     selector: string,
@@ -19,18 +20,30 @@ function createOverview(
     return app;
 }
 
-export { createOverview, PlotStateStore };
+function createRelations(
+    selector: string,
+    data: IRelationsData,
+    state: IPlotStateStore = new PlotStateStore('jglance:relations', false)
+) {
+    const app = createApp(Relations, { data, state });
+    app.mount(selector);
+    return app;
+}
+
+export { createOverview, createRelations, PlotStateStore };
 
 if (typeof window !== 'undefined') {
     (
         window as unknown as {
             Jglance: {
                 createOverview: typeof createOverview;
+                createRelations: typeof createRelations;
                 PlotStateStore: typeof PlotStateStore;
             };
         }
     ).Jglance = {
         createOverview,
+        createRelations,
         PlotStateStore,
     };
 }

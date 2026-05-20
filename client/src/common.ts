@@ -54,6 +54,49 @@ export interface IOverviewData {
     issuesDismissed?: boolean;
 }
 
+export interface IScatterPoint {
+    x: number;
+    y: number;
+}
+
+export interface IBarGroup {
+    label: string;
+    mean: number;
+    n: number;
+}
+
+export type IPairDetail =
+    | {
+          type: 'scatter';
+          points: IScatterPoint[];
+          xLabel: string;
+          yLabel: string;
+      }
+    | {
+          type: 'bars';
+          groups: IBarGroup[];
+          contLabel: string;
+          catLabel: string;
+      }
+    | {
+          type: 'mosaic';
+          rows: string[];
+          cols: string[];
+          counts: number[][];
+      };
+
+export interface IRelationsData {
+    variables: {
+        name: string;
+        description: string | null;
+        type: VariableType;
+    }[];
+    associations?: Record<string, Record<string, number>>;
+    selectedTarget?: string;
+    pairDetails?: Record<string, IPairDetail> | null;
+    error?: string;
+}
+
 /* ===================== JSON state store ===================== */
 
 type JSONPrimitive = string | number | boolean | null;

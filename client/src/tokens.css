@@ -52,6 +52,12 @@
     --bar-selected: #3e6e96; /* same as accent */
     --focus-ring: #5a8fb8;
 
+    /* variable type colors (matches Overview's type dot colors) */
+    --type-cont: var(--accent);
+    --type-nom: #c28a4a;
+    --type-ord: #6b9f6b;
+    --type-id: var(--ink-4);
+
     /* ---------- motion ---------- */
     --ease-snap: cubic-bezier(0.4, 0, 0.2, 1);
     --ease-rise: cubic-bezier(0.16, 1, 0.3, 1);
@@ -80,4 +86,10 @@
     --bar-hover: #a3bbd3;
     --bar-selected: #a8c5e0;
     --focus-ring: #a0bfd8;
+
+    /* variable type colors — dark palette */
+    --type-cont: var(--accent);
+    --type-nom: #d4956a;
+    --type-ord: #7db87d;
+    --type-id: var(--ink-4);
 }

@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>jglance — relations dev harness</title>
+        <style>
+            :root {
+                --stage: #eaeaea;
+                --stage-ink: #444;
+            }
+            @media (prefers-color-scheme: dark) {
+                :root {
+                    --stage: #1a1a1a;
+                    --stage-ink: #bbb;
+                }
+            }
+            html,
+            body {
+                background: var(--stage);
+                color: var(--stage-ink);
+                margin: 0;
+                font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+                min-height: 100vh;
+            }
+            .stage {
+                padding: 24px;
+                max-width: 560px;
+                margin: 0 auto;
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+            }
+            .stage__meta {
+                display: flex;
+                align-items: baseline;
+                justify-content: space-between;
+                font-size: 11px;
+                opacity: 0.7;
+                padding-bottom: 6px;
+                border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            }
+            .stage__meta p {
+                margin: 0;
+            }
+            .stage__meta a {
+                color: inherit;
+            }
+            #root {
+                border: 1px solid rgba(0, 0, 0, 0.1);
+            }
+        </style>
+    </head>
+    <body>
+        <div class="stage">
+            <div class="stage__meta">
+                <p>jglance · relations dev harness</p>
+                <a href="/">← dashboard</a>
+            </div>
+            <div id="root"></div>
+        </div>
+
+        <script type="module">
+            import { createRelations, PlotStateStore } from '/src/main.ts';
+
+            // Scatter points: BMI (x) × Outcome (y) — strong positive correlation
+            const bmiPoints = [
+                { x: 18.5, y: 0.12 },
+                { x: 19.2, y: 0.19 },
+                { x: 20.1, y: 0.23 },
+                { x: 20.8, y: 0.31 },
+                { x: 21.3, y: 0.28 },
+                { x: 22.0, y: 0.36 },
+                { x: 22.5, y: 0.42 },
+                { x: 23.1, y: 0.38 },
+                { x: 23.8, y: 0.48 },
+                { x: 24.2, y: 0.45 },
+                { x: 24.9, y: 0.53 },
+                { x: 25.3, y: 0.5 },
+                { x: 25.8, y: 0.59 },
+                { x: 26.1, y: 0.55 },
+                { x: 26.7, y: 0.63 },
+                { x: 27.2, y: 0.6 },
+                { x: 27.8, y: 0.68 },
+                { x: 28.1, y: 0.65 },
+                { x: 28.6, y: 0.73 },
+                { x: 29.0, y: 0.7 },
+                { x: 29.5, y: 0.76 },
+                { x: 30.1, y: 0.73 },
+                { x: 30.6, y: 0.8 },
+                { x: 31.0, y: 0.77 },
+                { x: 31.5, y: 0.83 },
+                { x: 32.0, y: 0.8 },
+                { x: 32.4, y: 0.86 },
+                { x: 33.1, y: 0.83 },
+                { x: 33.7, y: 0.89 },
+                { x: 34.2, y: 0.86 },
+                { x: 35.0, y: 0.91 },
+                { x: 35.5, y: 0.88 },
+                // natural scatter / outliers
+                { x: 23.5, y: 0.61 },
+                { x: 28.3, y: 0.43 },
+                { x: 31.2, y: 0.66 },
+                { x: 25.0, y: 0.74 },
+                { x: 30.8, y: 0.52 },
+                { x: 22.8, y: 0.55 },
+                { x: 27.0, y: 0.48 },
+                { x: 29.8, y: 0.88 },
+            ];
+
+            // Scatter points: Cholesterol (x) × Outcome (y) — moderate correlation
+            const cholPoints = [
+                { x: 150, y: 0.25 },
+                { x: 162, y: 0.3 },
+                { x: 171, y: 0.28 },
+                { x: 178, y: 0.38 },
+                { x: 185, y: 0.35 },
+                { x: 192, y: 0.42 },
+                { x: 198, y: 0.48 },
+                { x: 205, y: 0.44 },
+                { x: 212, y: 0.52 },
+                { x: 218, y: 0.5 },
+                { x: 225, y: 0.55 },
+                { x: 231, y: 0.58 },
+                { x: 238, y: 0.62 },
+                { x: 245, y: 0.6 },
+                { x: 251, y: 0.65 },
+                { x: 258, y: 0.63 },
+                { x: 265, y: 0.7 },
+                { x: 272, y: 0.68 },
+                { x: 278, y: 0.73 },
+                { x: 285, y: 0.71 },
+                { x: 220, y: 0.35 },
+                { x: 240, y: 0.78 },
+                { x: 195, y: 0.68 },
+                { x: 260, y: 0.45 },
+                { x: 175, y: 0.52 },
+                { x: 290, y: 0.8 },
+            ];
+
+            // Scatter: Age (x) × Outcome (y) — weak correlation
+            const agePoints = [
+                { x: 28, y: 0.3 },
+                { x: 32, y: 0.42 },
+                { x: 36, y: 0.38 },
+                { x: 40, y: 0.5 },
+                { x: 44, y: 0.45 },
+                { x: 48, y: 0.55 },
+                { x: 52, y: 0.48 },
+                { x: 56, y: 0.6 },
+                { x: 60, y: 0.58 },
+                { x: 64, y: 0.52 },
+                { x: 68, y: 0.65 },
+                { x: 72, y: 0.62 },
+                { x: 35, y: 0.7 },
+                { x: 50, y: 0.28 },
+                { x: 45, y: 0.72 },
+                { x: 58, y: 0.35 },
+                { x: 42, y: 0.65 },
+                { x: 55, y: 0.4 },
+                { x: 65, y: 0.75 },
+                { x: 48, y: 0.25 },
+            ];
+
+            const data = {
+                variables: [
+                    {
+                        name: 'Outcome',
+                        description:
+                            'Primary endpoint – 90-day composite survival score.',
+                        type: 'continuous',
+                    },
+                    {
+                        name: 'BMI',
+                        description: 'Body mass index at baseline.',
+                        type: 'continuous',
+                    },
+                    { name: 'Treatment', description: null, type: 'nominal' },
+                    {
+                        name: 'Cholesterol',
+                        description: 'Total cholesterol (mg/dL) at screening.',
+                        type: 'continuous',
+                    },
+                    { name: 'Site', description: null, type: 'nominal' },
+                    { name: 'Age', description: null, type: 'continuous' },
+                    { name: 'Gender', description: null, type: 'nominal' },
+                    {
+                        name: 'Severity',
+                        description: 'Baseline disease severity rating.',
+                        type: 'ordinal',
+                    },
+                ],
+                associations: {
+                    Outcome: {
+                        Outcome: 1.0,
+                        BMI: 0.72,
+                        Treatment: 0.51,
+                        Cholesterol: 0.44,
+                        Site: 0.31,
+                        Age: 0.23,
+                        Gender: 0.14,
+                        Severity: 0.08,
+                    },
+                    BMI: {
+                        Outcome: 0.72,
+                        BMI: 1.0,
+                        Treatment: 0.18,
+                        Cholesterol: 0.35,
+                        Site: 0.12,
+                        Age: 0.29,
+                        Gender: 0.05,
+                        Severity: 0.1,
+                    },
+                    Treatment: {
+                        Outcome: 0.51,
+                        BMI: 0.18,
+                        Treatment: 1.0,
+                        Cholesterol: 0.22,
+                        Site: 0.08,
+                        Age: 0.14,
+                        Gender: 0.21,
+                        Severity: 0.17,
+                    },
+                    Cholesterol: {
+                        Outcome: 0.44,
+                        BMI: 0.35,
+                        Treatment: 0.22,
+                        Cholesterol: 1.0,
+                        Site: 0.09,
+                        Age: 0.41,
+                        Gender: 0.06,
+                        Severity: 0.13,
+                    },
+                    Site: {
+                        Outcome: 0.31,
+                        BMI: 0.12,
+                        Treatment: 0.08,
+                        Cholesterol: 0.09,
+                        Site: 1.0,
+                        Age: 0.11,
+                        Gender: 0.28,
+                        Severity: 0.07,
+                    },
+                    Age: {
+                        Outcome: 0.23,
+                        BMI: 0.29,
+                        Treatment: 0.14,
+                        Cholesterol: 0.41,
+                        Site: 0.11,
+                        Age: 1.0,
+                        Gender: 0.04,
+                        Severity: 0.19,
+                    },
+                    Gender: {
+                        Outcome: 0.14,
+                        BMI: 0.05,
+                        Treatment: 0.21,
+                        Cholesterol: 0.06,
+                        Site: 0.28,
+                        Age: 0.04,
+                        Gender: 1.0,
+                        Severity: 0.09,
+                    },
+                    Severity: {
+                        Outcome: 0.08,
+                        BMI: 0.1,
+                        Treatment: 0.17,
+                        Cholesterol: 0.13,
+                        Site: 0.07,
+                        Age: 0.19,
+                        Gender: 0.09,
+                        Severity: 1.0,
+                    },
+                },
+                selectedTarget: 'Outcome',
+                pairDetails: {
+                    BMI: {
+                        type: 'scatter',
+                        points: bmiPoints,
+                        xLabel: 'BMI',
+                        yLabel: 'Outcome',
+                    },
+                    Treatment: {
+                        type: 'bars',
+                        groups: [
+                            { label: 'Placebo', mean: 0.33, n: 78 },
+                            { label: 'Drug A', mean: 0.6, n: 82 },
+                            { label: 'Drug B', mean: 0.72, n: 79 },
+                            { label: 'Drug C', mean: 0.79, n: 73 },
+                        ],
+                        contLabel: 'Outcome',
+                        catLabel: 'Treatment',
+                    },
+                    Cholesterol: {
+                        type: 'scatter',
+                        points: cholPoints,
+                        xLabel: 'Cholesterol',
+                        yLabel: 'Outcome',
+                    },
+                    Site: {
+                        type: 'bars',
+                        groups: [
+                            { label: 'Site 1', mean: 0.48, n: 62 },
+                            { label: 'Site 2', mean: 0.55, n: 71 },
+                            { label: 'Site 3', mean: 0.61, n: 58 },
+                            { label: 'Site 4', mean: 0.44, n: 67 },
+                            { label: 'Site 5', mean: 0.52, n: 54 },
+                        ],
+                        contLabel: 'Outcome',
+                        catLabel: 'Site',
+                    },
+                    Age: {
+                        type: 'scatter',
+                        points: agePoints,
+                        xLabel: 'Age',
+                        yLabel: 'Outcome',
+                    },
+                    Gender: {
+                        type: 'bars',
+                        groups: [
+                            { label: 'Female', mean: 0.53, n: 158 },
+                            { label: 'Male', mean: 0.47, n: 154 },
+                        ],
+                        contLabel: 'Outcome',
+                        catLabel: 'Gender',
+                    },
+                    Severity: {
+                        type: 'mosaic',
+                        rows: ['Mild', 'Moderate', 'Severe'],
+                        cols: ['Placebo', 'Drug A', 'Drug B', 'Drug C'],
+                        counts: [
+                            [28, 24, 26, 22],
+                            [30, 32, 28, 29],
+                            [20, 26, 25, 22],
+                        ],
+                    },
+                },
+            };
+
+            createRelations(
+                '#root',
+                data,
+                new PlotStateStore('jglance-relations-dev')
+            );
+        </script>
+    </body>
+</html>
