@@ -140,6 +140,7 @@ relationsClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # We use abs(cor) because we want a 0-1 strength metric for ranking,
                     # but R^2 is more standard for "variance explained".
                     r <- cor(x, y)
+                    if (!is.finite(r)) return(0.0)
                     return(as.numeric(r^2))
                 } else if (!isNum1 && !isNum2) {
                     # Cat vs Cat: Cramer's V
@@ -164,7 +165,7 @@ relationsClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     fit <- aov(dep ~ indep)
                     ss <- summary(fit)[[1]][, "Sum Sq"]
                     eta2 <- ss[1] / sum(ss)
-                    return(as.numeric(eta2))
+                    return(if (!is.finite(eta2)) 0.0 else as.numeric(eta2))
                 }
             },
             .computePairDetails = function(targetName, varsData, varNames) {
@@ -204,14 +205,15 @@ relationsClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     } else if (targetIsNum && !predIsNum) {
                         lvls <- if (is.factor(pred)) levels(pred) else
                             sort(unique(as.character(pred)))
-                        grps <- lapply(lvls, function(lvl) {
+                        grps <- Filter(Negate(is.null), lapply(lvls, function(lvl) {
                             vals <- tgt[as.character(pred) == lvl]
+                            if (length(vals) == 0) return(NULL)
                             list(
                                 label = lvl,
                                 mean = as.numeric(mean(vals, na.rm = TRUE)),
                                 n = as.integer(length(vals))
                             )
-                        })
+                        }))
                         details[[name]] <- list(
                             type = "bars",
                             groups = I(grps),
@@ -221,14 +223,15 @@ relationsClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     } else if (!targetIsNum && predIsNum) {
                         lvls <- if (is.factor(tgt)) levels(tgt) else
                             sort(unique(as.character(tgt)))
-                        grps <- lapply(lvls, function(lvl) {
+                        grps <- Filter(Negate(is.null), lapply(lvls, function(lvl) {
                             vals <- pred[as.character(tgt) == lvl]
+                            if (length(vals) == 0) return(NULL)
                             list(
                                 label = lvl,
                                 mean = as.numeric(mean(vals, na.rm = TRUE)),
                                 n = as.integer(length(vals))
                             )
-                        })
+                        }))
                         details[[name]] <- list(
                             type = "bars",
                             groups = I(grps),

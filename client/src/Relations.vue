@@ -232,6 +232,7 @@ function typeColor(t: VariableType): string {
 }
 
 function fmt(v: number): string {
+    if (typeof v !== 'number' || !isFinite(v)) return '—';
     if (v >= 0.995) return '1.00';
     return v.toFixed(2);
 }
