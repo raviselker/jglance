@@ -6,7 +6,8 @@ overviewClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             .maxLevels = 12L,
             .init = function() {
                 overview <- self$results$overview
-                overview$scripts <- c("jglance.umd.js")
+                overview$scripts <- "jglance.umd.js"
+                overview$stylesheets <- "jglance.css"
             },
             .run = function() {
                 varNames <- self$options$vars

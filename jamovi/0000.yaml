@@ -19,6 +19,13 @@ analyses:
     menuGroup: Exploration
     menuSubgroup: jglance
     menuTitle: Data Overview
+  - title: Relations Overview
+    name: relations
+    ns: jglance
+    category: analyses
+    menuGroup: Exploration
+    menuSubgroup: jglance
+    menuTitle: Relations Overview
 usesNative: true
 minApp: 2.7.14
 

@@ -1,0 +1,26 @@
+---
+name:  relations
+title: Relations Overview
+menuGroup: Exploration
+menuSubgroup: jglance
+version: '1.0.0'
+jas: '1.2'
+
+options:
+    - name: data
+      type: Data
+
+    - name: vars
+      title: Variables
+      type: Variables
+      default: ~
+      takeFromDataIfMissing: true
+      permitted:
+        - numeric
+        - factor
+
+    - name: selectedTarget
+      type: String
+      hidden: true
+      default: ''
+...
