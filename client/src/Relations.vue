@@ -7,6 +7,7 @@ import type {
     VariableType,
 } from './common';
 import MiniPlot from './widgets/relations/MiniPlot.vue';
+import MatrixView from './widgets/relations/MatrixView.vue';
 
 const props = defineProps<{
     data: IRelationsData;
@@ -28,6 +29,15 @@ const sortOptions: { id: SortMode; label: string }[] = [
     { id: 'type', label: 'Type' },
     { id: 'original', label: 'Original order' },
 ];
+
+type ViewMode = 'list' | 'matrix';
+const viewMode = ref<ViewMode>(
+    (props.state.get<string>('viewMode') as ViewMode | null) ??
+    (props.data.viewMode as ViewMode | undefined) ??
+    'list'
+);
+// sessionStorage only — calling setOption here triggers a full R re-run + init flash
+watch(viewMode, (v) => props.state.set({ viewMode: v }));
 
 type TypeFilter = 'all' | 'continuous' | 'categorical';
 const typeFilter = ref<TypeFilter>('all');
@@ -71,6 +81,7 @@ function setFocus(varName: string) {
     expandedVars.value = new Set();
     if (typeof (window as any).setOption === 'function') {
         (window as any).setOption('selectedTarget', varName);
+        (window as any).setOption('viewMode', viewMode.value);
     }
 }
 
@@ -205,6 +216,17 @@ const associationBreakdown = computed(() => {
     return `${vars.length} associations · ${parts.join(' · ')}`;
 });
 
+
+const matrixVars = computed(() => {
+    let vars = props.data.variables;
+    if (typeFilter.value === 'continuous') {
+        vars = vars.filter((v) => v.type === 'continuous');
+    } else if (typeFilter.value === 'categorical') {
+        vars = vars.filter((v) => v.type !== 'continuous');
+    }
+    return vars;
+});
+
 function pairDetail(varName: string): IPairDetail | null {
     return props.data.pairDetails?.[varName] ?? null;
 }
@@ -279,8 +301,39 @@ function fmt(v: number): string {
         </template>
 
         <div v-else class="relations">
+            <!-- ── View mode toggle ── -->
+            <div class="view-toggle" role="group" aria-label="View mode">
+                <button
+                    type="button"
+                    class="view-toggle__btn"
+                    :class="{ 'is-active': viewMode === 'list' }"
+                    @click="viewMode = 'list'"
+                >
+                    <svg width="13" height="11" viewBox="0 0 13 11" aria-hidden="true" fill="none">
+                        <line x1="0" y1="1" x2="13" y2="1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <line x1="0" y1="5.5" x2="13" y2="5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <line x1="0" y1="10" x2="13" y2="10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                    <span>List</span>
+                </button>
+                <button
+                    type="button"
+                    class="view-toggle__btn"
+                    :class="{ 'is-active': viewMode === 'matrix' }"
+                    @click="viewMode = 'matrix'"
+                >
+                    <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
+                        <rect x="0" y="0" width="5" height="5" rx="1" fill="currentColor"/>
+                        <rect x="7" y="0" width="5" height="5" rx="1" fill="currentColor"/>
+                        <rect x="0" y="7" width="5" height="5" rx="1" fill="currentColor"/>
+                        <rect x="7" y="7" width="5" height="5" rx="1" fill="currentColor"/>
+                    </svg>
+                    <span>Matrix</span>
+                </button>
+            </div>
+
             <!-- ── Focus section ── -->
-            <div class="focus-section" :class="{ 'is-open': showDropdown }" @click.stop>
+            <div v-if="viewMode === 'list'" class="focus-section" :class="{ 'is-open': showDropdown }" @click.stop>
                 <!-- Trigger row -->
                 <div
                     class="focus-trigger"
@@ -439,7 +492,7 @@ function fmt(v: number): string {
                             {{ opt.label }}
                         </button>
                     </div>
-                    <label class="controls__sort">
+                    <label v-if="viewMode === 'list'" class="controls__sort">
                         <span class="controls__label">Sort:</span>
                         <span class="controls__select-wrap">
                             <span class="controls__select-value">{{
@@ -476,6 +529,7 @@ function fmt(v: number): string {
                         </span>
                     </label>
                     <button
+                        v-if="viewMode === 'list'"
                         type="button"
                         class="assoc-expand-btn"
                         :disabled="predictors.length === 0"
@@ -484,7 +538,13 @@ function fmt(v: number): string {
                         {{ anyExpanded ? 'Collapse all' : 'Expand all' }}
                     </button>
                 </div>
-                <ul class="assoc-list">
+                <MatrixView
+                    v-if="viewMode === 'matrix'"
+                    :variables="matrixVars"
+                    :associations="data.associations ?? {}"
+                    :all-pair-details="data.allPairDetails"
+                />
+                <ul v-else class="assoc-list">
                     <template v-for="item in predictorItems" :key="item.key">
                         <!-- Column header (non-type sorts) -->
                         <li v-if="item.kind === 'colheader'" class="assoc-colheader" aria-hidden="true">
@@ -574,6 +634,45 @@ function fmt(v: number): string {
     font-family: var(--font-sans);
     font-size: var(--type-body);
     line-height: 1.5;
+}
+
+/* ── View mode toggle ── */
+.view-toggle {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: var(--space-12);
+}
+
+.view-toggle__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-6);
+    padding: 4px 10px;
+    background: var(--surface);
+    border: none;
+    border-right: 1px solid var(--rule);
+    color: var(--ink-3);
+    font: inherit;
+    font-size: var(--type-helper);
+    cursor: pointer;
+    transition:
+        background var(--dur-fast) var(--ease-snap),
+        color var(--dur-fast) var(--ease-snap);
+    line-height: 1.4;
+}
+.view-toggle__btn:last-child {
+    border-right: none;
+}
+.view-toggle__btn:hover:not(.is-active) {
+    background: var(--surface-sunk);
+    color: var(--ink-2);
+}
+.view-toggle__btn.is-active {
+    background: var(--accent);
+    color: white;
 }
 
 /* ── Empty state ── */
@@ -829,7 +928,6 @@ function fmt(v: number): string {
     display: flex;
     align-items: baseline;
     gap: var(--space-12);
-    margin-top: var(--space-12);
     margin-bottom: var(--space-12);
     padding: 0 var(--space-4);
 }
