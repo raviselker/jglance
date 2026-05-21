@@ -23,4 +23,9 @@ options:
       type: String
       hidden: true
       default: ''
+
+    - name: viewMode
+      type: String
+      hidden: true
+      default: 'list'
 ...

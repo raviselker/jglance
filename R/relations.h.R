@@ -7,7 +7,8 @@ relationsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     public = list(
         initialize = function(
             vars = NULL,
-            selectedTarget = "", ...) {
+            selectedTarget = "",
+            viewMode = "list", ...) {
 
             super$initialize(
                 package="jglance",
@@ -28,16 +29,24 @@ relationsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 selectedTarget,
                 hidden=TRUE,
                 default="")
+            private$..viewMode <- jmvcore::OptionString$new(
+                "viewMode",
+                viewMode,
+                hidden=TRUE,
+                default="list")
 
             self$.addOption(private$..vars)
             self$.addOption(private$..selectedTarget)
+            self$.addOption(private$..viewMode)
         }),
     active = list(
         vars = function() private$..vars$value,
-        selectedTarget = function() private$..selectedTarget$value),
+        selectedTarget = function() private$..selectedTarget$value,
+        viewMode = function() private$..viewMode$value),
     private = list(
         ..vars = NA,
-        ..selectedTarget = NA)
+        ..selectedTarget = NA,
+        ..viewMode = NA)
 )
 
 relationsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -86,6 +95,7 @@ relationsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param data .
 #' @param vars .
 #' @param selectedTarget .
+#' @param viewMode .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$relations} \tab \tab \tab \tab \tab a html \cr
@@ -95,7 +105,8 @@ relationsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 relations <- function(
     data,
     vars = NULL,
-    selectedTarget = "") {
+    selectedTarget = "",
+    viewMode = "list") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("relations requires jmvcore to be installed (restart may be required)")
@@ -110,7 +121,8 @@ relations <- function(
 
     options <- relationsOptions$new(
         vars = vars,
-        selectedTarget = selectedTarget)
+        selectedTarget = selectedTarget,
+        viewMode = viewMode)
 
     analysis <- relationsClass$new(
         options = options,

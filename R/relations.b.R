@@ -7,10 +7,6 @@ relationsClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 relations <- self$results$relations
                 relations$scripts <- "jglance.umd.js"
                 relations$stylesheets <- "jglance.css"
-                private$.renderHtml(list(
-                    variables = I(list()),
-                    error = "Add variables to the options panel to start exploring their relations."
-                ))
             },
             .run = function() {
                 varNames <- self$options$vars
@@ -83,19 +79,30 @@ relationsClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     targetName <- varNames[[1]]
                 }
 
-                pairDetails <- if (
-                    nchar(targetName) > 0 && targetName %in% varNames
-                ) {
-                    private$.computePairDetails(targetName, varsData, varNames)
+                viewModeRaw <- self$options$viewMode
+                viewMode <- if (is.null(viewModeRaw) || length(viewModeRaw) == 0) {
+                    "list"
                 } else {
-                    NULL
+                    as.character(viewModeRaw)
                 }
+
+                # Compute pair details for every variable as target so the
+                # matrix view can show a plot for any clicked cell.
+                allPairDetails <- list()
+                for (tgt in varNames) {
+                    allPairDetails[[tgt]] <- private$.computePairDetails(
+                        tgt, varsData, varNames
+                    )
+                }
+                pairDetails <- allPairDetails[[targetName]]
 
                 payload <- list(
                     variables = variables,
                     associations = matrix,
                     selectedTarget = targetName,
-                    pairDetails = pairDetails
+                    viewMode = viewMode,
+                    pairDetails = pairDetails,
+                    allPairDetails = allPairDetails
                 )
 
                 private$.renderHtml(payload)
@@ -154,14 +161,13 @@ relationsClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     ))
                     return(if (is.na(v)) 0.0 else v)
                 } else {
-                    # Cat vs Cont: Eta-squared (from ANOVA)
-                    # We treat the numeric one as the dependent variable.
+                    # Cat vs Cont: Eta-squared (SS_between / SS_total from ANOVA).
+                    # Treat the numeric variable as the outcome.
                     dep <- if (isNum1) x else y
                     indep <- if (isNum1) y else x
 
                     if (length(unique(indep)) < 2) return(0.0)
 
-                    # Quick Eta-squared calculation: (SS_between / SS_total)
                     fit <- aov(dep ~ indep)
                     ss <- summary(fit)[[1]][, "Sum Sq"]
                     eta2 <- ss[1] / sum(ss)

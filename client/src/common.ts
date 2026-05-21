@@ -93,7 +93,9 @@ export interface IRelationsData {
     }[];
     associations?: Record<string, Record<string, number>>;
     selectedTarget?: string;
+    viewMode?: string;
     pairDetails?: Record<string, IPairDetail> | null;
+    allPairDetails?: Record<string, Record<string, IPairDetail>>;
     error?: string;
 }
 
