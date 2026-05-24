@@ -86,6 +86,20 @@ relationsClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     as.character(viewModeRaw)
                 }
 
+                typeFilterRaw <- self$options$typeFilter
+                typeFilter <- if (is.null(typeFilterRaw) || length(typeFilterRaw) == 0) {
+                    "all"
+                } else {
+                    as.character(typeFilterRaw)
+                }
+
+                sortModeRaw <- self$options$sortMode
+                sortMode <- if (is.null(sortModeRaw) || length(sortModeRaw) == 0) {
+                    "strength"
+                } else {
+                    as.character(sortModeRaw)
+                }
+
                 # Compute pair details for every variable as target so the
                 # matrix view can show a plot for any clicked cell.
                 allPairDetails <- list()
@@ -101,6 +115,8 @@ relationsClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     associations = matrix,
                     selectedTarget = targetName,
                     viewMode = viewMode,
+                    typeFilter = typeFilter,
+                    sortMode = sortMode,
                     pairDetails = pairDetails,
                     allPairDetails = allPairDetails
                 )
