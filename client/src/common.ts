@@ -1,3 +1,6 @@
+import { ref, watch } from 'vue';
+import type { Ref } from 'vue';
+
 // Shared types + a sessionStorage-backed state store, modeled on
 // jamovi/besoplots' PlotStateStore. Widgets share state via this store
 // so selections survive jamovi re-renders.
@@ -94,6 +97,8 @@ export interface IRelationsData {
     associations?: Record<string, Record<string, number>>;
     selectedTarget?: string;
     viewMode?: string;
+    typeFilter?: string;
+    sortMode?: string;
     pairDetails?: Record<string, IPairDetail> | null;
     allPairDetails?: Record<string, Record<string, IPairDetail>>;
     error?: string;
@@ -181,4 +186,34 @@ function safeStorage(kind: 'local' | 'session'): Storage {
             },
         } as Storage;
     }
+}
+
+/* ===================== jamovi option bridge ===================== */
+
+/**
+ * Calls jamovi's window.setOption() if available. Silently no-ops in the
+ * dev harness. Triggers an analysis re-run and persists the value to .omv.
+ */
+export function pushOptionToJamovi(name: string, value: unknown): void {
+    const fn = (
+        window as unknown as { setOption?: (n: string, v: unknown) => void }
+    ).setOption;
+    if (typeof fn === 'function') {
+        try {
+            fn(name, value);
+        } catch {
+            /* ignore */
+        }
+    }
+}
+
+/**
+ * Seeds a Vue ref from a jamovi-persisted value and watches it back to jamovi.
+ * Use for any state that must survive .omv save/reopen.
+ * Must be called inside a Vue component setup or composable (needs effect scope).
+ */
+export function useJamoviOption<T>(name: string, seed: T): Ref<T> {
+    const value = ref(seed) as Ref<T>;
+    watch(value, (v) => pushOptionToJamovi(name, v), { flush: 'post' });
+    return value;
 }
