@@ -8,21 +8,19 @@ import type {
 } from './common';
 import MiniPlot from './widgets/relations/MiniPlot.vue';
 import MatrixView from './widgets/relations/MatrixView.vue';
+import { useRelationsState } from './composables/useRelationsState';
+import type { RelationsSortMode, RelationsTypeFilter } from './composables/useRelationsState';
 
 const props = defineProps<{
     data: IRelationsData;
     state: IPlotStateStore;
 }>();
 
-const selectedTarget = ref(
-    props.data.selectedTarget ||
-        (props.data.variables.length > 0 ? props.data.variables[0]!.name : '')
-);
-const expandedVars = ref<Set<string>>(new Set());
+const { selectedTarget, viewMode, typeFilter, sortMode, expandedVars } =
+    useRelationsState(props.data, props.state);
 const showDropdown = ref(false);
 
-type SortMode = 'strength' | 'name' | 'type' | 'original';
-const sortMode = ref<SortMode>('strength');
+type SortMode = RelationsSortMode;
 const sortOptions: { id: SortMode; label: string }[] = [
     { id: 'strength', label: 'Effect strength' },
     { id: 'name', label: 'Name' },
@@ -30,17 +28,7 @@ const sortOptions: { id: SortMode; label: string }[] = [
     { id: 'original', label: 'Original order' },
 ];
 
-type ViewMode = 'list' | 'matrix';
-const viewMode = ref<ViewMode>(
-    (props.state.get<string>('viewMode') as ViewMode | null) ??
-    (props.data.viewMode as ViewMode | undefined) ??
-    'list'
-);
-// sessionStorage only — calling setOption here triggers a full R re-run + init flash
-watch(viewMode, (v) => props.state.set({ viewMode: v }));
-
-type TypeFilter = 'all' | 'continuous' | 'categorical';
-const typeFilter = ref<TypeFilter>('all');
+type TypeFilter = RelationsTypeFilter;
 const typeOptions: { id: TypeFilter; label: string }[] = [
     { id: 'all', label: 'All' },
     { id: 'continuous', label: 'Continuous' },
@@ -79,10 +67,6 @@ function setFocus(varName: string) {
     selectedTarget.value = varName;
     showDropdown.value = false;
     expandedVars.value = new Set();
-    if (typeof (window as any).setOption === 'function') {
-        (window as any).setOption('selectedTarget', varName);
-        (window as any).setOption('viewMode', viewMode.value);
-    }
 }
 
 function toggleExpand(varName: string) {
