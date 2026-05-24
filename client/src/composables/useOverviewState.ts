@@ -1,6 +1,7 @@
 import { ref, watch } from 'vue';
 import type { Ref } from 'vue';
 import type { IOverviewData, IPlotStateStore } from '../common';
+import { useJamoviOption } from './useJamoviOption';
 
 export type OverviewTypeFilter = 'all' | 'continuous' | 'categorical';
 export type OverviewSortMode = 'original' | 'name' | 'type' | 'missing-desc';
@@ -25,27 +26,6 @@ export interface OverviewState {
 }
 
 export const OVERVIEW_STATE_KEY = Symbol('overview-state');
-
-/**
- * Calls jamovi's `window.setOption` if it's available. This is exposed by the
- * jamovi results-html iframe and triggers an analysis re-run, but jamovi
- * persists the value to the .omv file — which is the *only* way to make state
- * survive save/reopen.
- *
- * Silently no-ops in the dev harness (which doesn't have window.setOption).
- */
-function pushOptionToJamovi(name: string, value: unknown): void {
-    const fn = (
-        window as unknown as { setOption?: (n: string, v: unknown) => void }
-    ).setOption;
-    if (typeof fn === 'function') {
-        try {
-            fn(name, value);
-        } catch {
-            /* ignore */
-        }
-    }
-}
 
 /**
  * Builds the shared state composable.
@@ -79,22 +59,15 @@ export function useOverviewState(
             : 'original';
     const seedDismissed: boolean = data.issuesDismissed === true;
 
-    const typeFilter = ref<OverviewTypeFilter>(seedType);
-    const sortMode = ref<OverviewSortMode>(seedSort);
-    const issuesDismissed = ref<boolean>(seedDismissed);
-
-    /* Push changes back to jamovi so they persist. `flush: 'post'` ensures the
-     * setOption call happens after Vue's render pass, avoiding any chance of
-     * setOption triggering a re-render while we're already rendering. */
-    watch(sortMode, (v) => pushOptionToJamovi('sortMode', v), {
-        flush: 'post',
-    });
-    watch(typeFilter, (v) => pushOptionToJamovi('typeFilter', v), {
-        flush: 'post',
-    });
-    watch(issuesDismissed, (v) => pushOptionToJamovi('issuesDismissed', v), {
-        flush: 'post',
-    });
+    const typeFilter = useJamoviOption<OverviewTypeFilter>(
+        'typeFilter',
+        seedType
+    );
+    const sortMode = useJamoviOption<OverviewSortMode>('sortMode', seedSort);
+    const issuesDismissed = useJamoviOption<boolean>(
+        'issuesDismissed',
+        seedDismissed
+    );
 
     function toggle(name: string) {
         const idx = expanded.value.indexOf(name);
