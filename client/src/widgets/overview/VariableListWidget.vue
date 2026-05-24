@@ -149,7 +149,11 @@ function previewStat(v: IVariableSummary): string {
 <template>
     <ul ref="listRef" class="list" v-if="variables.length > 0">
         <template v-for="item in itemsWithHeaders" :key="item.key">
-            <li v-if="item.kind === 'colheader'" class="list__colheader" aria-hidden="true">
+            <li
+                v-if="item.kind === 'colheader'"
+                class="list__colheader"
+                aria-hidden="true"
+            >
                 <span class="list__colheader__var">Variable</span>
                 <span class="list__colheader__missing">Missing</span>
             </li>

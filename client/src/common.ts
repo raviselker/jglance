@@ -184,4 +184,3 @@ function safeStorage(kind: 'local' | 'session'): Storage {
         } as Storage;
     }
 }
-

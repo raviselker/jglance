@@ -111,8 +111,7 @@ function onCellClick(i: number, j: number) {
     if (i === j) return;
     const cur = selectedCell.value;
     const isMirror =
-        cur &&
-        ((cur.i === i && cur.j === j) || (cur.i === j && cur.j === i));
+        cur && ((cur.i === i && cur.j === j) || (cur.i === j && cur.j === i));
     selectedCell.value = isMirror ? null : { i, j };
 }
 
@@ -128,7 +127,12 @@ const pairInfo = computed(() => {
     if (!cur) return null;
     const a = props.variables[cur.i]!;
     const b = props.variables[cur.j]!;
-    return { a, b, v: getAssoc(cur.i, cur.j), metric: getMetric(a.type, b.type) };
+    return {
+        a,
+        b,
+        v: getAssoc(cur.i, cur.j),
+        metric: getMetric(a.type, b.type),
+    };
 });
 
 // Look up mini-plot data: allPairDetails[rowVar][colVar] — row is treated as
@@ -150,112 +154,121 @@ function fmt(v: number): string {
 <template>
     <div ref="wrapRef" class="matrix-scroll">
         <div class="matrix-wrap">
-        <template v-if="n > 0">
-            <div class="matrix" :style="gridStyle">
-                <!-- Corner -->
-                <div class="matrix__corner"></div>
+            <template v-if="n > 0">
+                <div class="matrix" :style="gridStyle">
+                    <!-- Corner -->
+                    <div class="matrix__corner"></div>
 
-                <!-- Column headers (rotated labels) -->
-                <!-- z-index decreases left→right so earlier labels paint over later backgrounds -->
-                <div
-                    v-for="(v, j) in variables"
-                    :key="`col-${j}`"
-                    class="matrix__col-label"
-                    :class="{ 'is-cross': isColHighlighted(j) }"
-                    :style="{ zIndex: variables.length - j }"
-                    :title="v.name"
-                >
-                    <span class="matrix__col-label-text">{{
-                        trunc(v.name, 8)
-                    }}</span>
-                </div>
-
-                <!-- Data rows -->
-                <template v-for="(varA, i) in variables" :key="`row-${i}`">
+                    <!-- Column headers (rotated labels) -->
+                    <!-- z-index decreases left→right so earlier labels paint over later backgrounds -->
                     <div
-                        class="matrix__row-label"
-                        :class="{ 'is-cross': isRowHighlighted(i) }"
-                        :title="varA.name"
+                        v-for="(v, j) in variables"
+                        :key="`col-${j}`"
+                        class="matrix__col-label"
+                        :class="{ 'is-cross': isColHighlighted(j) }"
+                        :style="{ zIndex: variables.length - j }"
+                        :title="v.name"
                     >
-                        <span
-                            class="matrix__type-dot"
-                            :style="`background: ${TYPE_DOT_COLOR[varA.type]}`"
-                        ></span>
-                        <span class="matrix__row-label-text">{{
-                            trunc(varA.name, 11)
+                        <span class="matrix__col-label-text">{{
+                            trunc(v.name, 8)
                         }}</span>
                     </div>
-                    <div
-                        v-for="(varB, j) in variables"
-                        :key="`cell-${i}-${j}`"
-                        class="matrix__cell"
-                        :class="{
-                            'is-diag': i === j,
-                            'is-selected': isSelected(i, j),
-                        }"
-                        :style="{
-                            background: cellBg(
-                                getAssoc(i, j),
-                                i === j,
-                                varA.type
-                            ),
-                            color: cellFg(getAssoc(i, j), i === j),
-                            height: `${cellSize}px`,
-                        }"
-                        :title="
-                            i === j
-                                ? varA.name
-                                : `${varA.name} × ${varB.name}: ${getMetric(varA.type, varB.type)} = ${fmt(getAssoc(i, j))}`
-                        "
-                        :role="i !== j ? 'button' : undefined"
-                        :tabindex="i !== j ? 0 : undefined"
-                        @mouseenter="hoveredCell = i !== j ? { i, j } : null"
-                        @mouseleave="hoveredCell = null"
-                        @click="onCellClick(i, j)"
-                        @keydown.enter="onCellClick(i, j)"
-                        @keydown.space.prevent="onCellClick(i, j)"
-                    >
-                        <span
-                            v-if="showValues && i !== j"
-                            class="matrix__cell-val"
-                            >{{ fmt(getAssoc(i, j)) }}</span
+
+                    <!-- Data rows -->
+                    <template v-for="(varA, i) in variables" :key="`row-${i}`">
+                        <div
+                            class="matrix__row-label"
+                            :class="{ 'is-cross': isRowHighlighted(i) }"
+                            :title="varA.name"
                         >
-                    </div>
-                </template>
-            </div>
-
-            <!-- Colour scale legend -->
-            <div class="matrix__legend">
-                <span class="legend__label">0</span>
-                <div class="legend__ramp"></div>
-                <span class="legend__label">1</span>
-                <span class="legend__hint">Association strength</span>
-            </div>
-
-            <!-- Selected pair detail panel -->
-            <Transition name="detail">
-                <div v-if="pairInfo" class="matrix__detail">
-                    <div class="matrix__pair-strip">
-                        <span
-                            class="pair-dot"
-                            :style="`background: ${TYPE_DOT_COLOR[pairInfo.a.type]}`"
-                        ></span>
-                        <span class="pair-name">{{ pairInfo.a.name }}</span>
-                        <span class="pair-sep">×</span>
-                        <span
-                            class="pair-dot"
-                            :style="`background: ${TYPE_DOT_COLOR[pairInfo.b.type]}`"
-                        ></span>
-                        <span class="pair-name">{{ pairInfo.b.name }}</span>
-                        <span class="pair-metric">{{ pairInfo.metric }}</span>
-                        <span class="pair-value">{{ fmt(pairInfo.v) }}</span>
-                    </div>
-                    <MiniPlot v-if="activePairDetail" :detail="activePairDetail" />
+                            <span
+                                class="matrix__type-dot"
+                                :style="`background: ${TYPE_DOT_COLOR[varA.type]}`"
+                            ></span>
+                            <span class="matrix__row-label-text">{{
+                                trunc(varA.name, 11)
+                            }}</span>
+                        </div>
+                        <div
+                            v-for="(varB, j) in variables"
+                            :key="`cell-${i}-${j}`"
+                            class="matrix__cell"
+                            :class="{
+                                'is-diag': i === j,
+                                'is-selected': isSelected(i, j),
+                            }"
+                            :style="{
+                                background: cellBg(
+                                    getAssoc(i, j),
+                                    i === j,
+                                    varA.type
+                                ),
+                                color: cellFg(getAssoc(i, j), i === j),
+                                height: `${cellSize}px`,
+                            }"
+                            :title="
+                                i === j
+                                    ? varA.name
+                                    : `${varA.name} × ${varB.name}: ${getMetric(varA.type, varB.type)} = ${fmt(getAssoc(i, j))}`
+                            "
+                            :role="i !== j ? 'button' : undefined"
+                            :tabindex="i !== j ? 0 : undefined"
+                            @mouseenter="
+                                hoveredCell = i !== j ? { i, j } : null
+                            "
+                            @mouseleave="hoveredCell = null"
+                            @click="onCellClick(i, j)"
+                            @keydown.enter="onCellClick(i, j)"
+                            @keydown.space.prevent="onCellClick(i, j)"
+                        >
+                            <span
+                                v-if="showValues && i !== j"
+                                class="matrix__cell-val"
+                                >{{ fmt(getAssoc(i, j)) }}</span
+                            >
+                        </div>
+                    </template>
                 </div>
-            </Transition>
-        </template>
 
-        <p v-else class="matrix-empty">No variables to display.</p>
+                <!-- Colour scale legend -->
+                <div class="matrix__legend">
+                    <span class="legend__label">0</span>
+                    <div class="legend__ramp"></div>
+                    <span class="legend__label">1</span>
+                    <span class="legend__hint">Association strength</span>
+                </div>
+
+                <!-- Selected pair detail panel -->
+                <Transition name="detail">
+                    <div v-if="pairInfo" class="matrix__detail">
+                        <div class="matrix__pair-strip">
+                            <span
+                                class="pair-dot"
+                                :style="`background: ${TYPE_DOT_COLOR[pairInfo.a.type]}`"
+                            ></span>
+                            <span class="pair-name">{{ pairInfo.a.name }}</span>
+                            <span class="pair-sep">×</span>
+                            <span
+                                class="pair-dot"
+                                :style="`background: ${TYPE_DOT_COLOR[pairInfo.b.type]}`"
+                            ></span>
+                            <span class="pair-name">{{ pairInfo.b.name }}</span>
+                            <span class="pair-metric">{{
+                                pairInfo.metric
+                            }}</span>
+                            <span class="pair-value">{{
+                                fmt(pairInfo.v)
+                            }}</span>
+                        </div>
+                        <MiniPlot
+                            v-if="activePairDetail"
+                            :detail="activePairDetail"
+                        />
+                    </div>
+                </Transition>
+            </template>
+
+            <p v-else class="matrix-empty">No variables to display.</p>
         </div>
     </div>
 </template>
@@ -279,14 +292,14 @@ function fmt(v: number): string {
 /* Corner (top-left blank cell) */
 .matrix__corner {
     height: 70px;
-    background: var(--surface);
+    background: transparent;
 }
 
 /* Column header cells */
 .matrix__col-label {
     position: relative;
     height: 70px;
-    background: var(--surface);
+    background: transparent;
     overflow: visible;
     transition: background var(--dur-fast) var(--ease-snap);
 }
@@ -312,7 +325,7 @@ function fmt(v: number): string {
     display: flex;
     align-items: center;
     gap: var(--space-6);
-    background: var(--surface);
+    background: transparent;
     padding: 0 var(--space-8) 0 var(--space-6);
     overflow: hidden;
     transition: background var(--dur-fast) var(--ease-snap);

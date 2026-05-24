@@ -70,7 +70,9 @@ relationsClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 }
 
                 targetRaw <- self$options$selectedTarget
-                targetName <- if (is.null(targetRaw) || length(targetRaw) == 0) {
+                targetName <- if (
+                    is.null(targetRaw) || length(targetRaw) == 0
+                ) {
                     ""
                 } else {
                     as.character(targetRaw)
@@ -80,21 +82,27 @@ relationsClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 }
 
                 viewModeRaw <- self$options$viewMode
-                viewMode <- if (is.null(viewModeRaw) || length(viewModeRaw) == 0) {
+                viewMode <- if (
+                    is.null(viewModeRaw) || length(viewModeRaw) == 0
+                ) {
                     "list"
                 } else {
                     as.character(viewModeRaw)
                 }
 
                 typeFilterRaw <- self$options$typeFilter
-                typeFilter <- if (is.null(typeFilterRaw) || length(typeFilterRaw) == 0) {
+                typeFilter <- if (
+                    is.null(typeFilterRaw) || length(typeFilterRaw) == 0
+                ) {
                     "all"
                 } else {
                     as.character(typeFilterRaw)
                 }
 
                 sortModeRaw <- self$options$sortMode
-                sortMode <- if (is.null(sortModeRaw) || length(sortModeRaw) == 0) {
+                sortMode <- if (
+                    is.null(sortModeRaw) || length(sortModeRaw) == 0
+                ) {
                     "strength"
                 } else {
                     as.character(sortModeRaw)
@@ -105,7 +113,9 @@ relationsClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 allPairDetails <- list()
                 for (tgt in varNames) {
                     allPairDetails[[tgt]] <- private$.computePairDetails(
-                        tgt, varsData, varNames
+                        tgt,
+                        varsData,
+                        varNames
                     )
                 }
                 pairDetails <- allPairDetails[[targetName]]
@@ -227,15 +237,18 @@ relationsClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     } else if (targetIsNum && !predIsNum) {
                         lvls <- if (is.factor(pred)) levels(pred) else
                             sort(unique(as.character(pred)))
-                        grps <- Filter(Negate(is.null), lapply(lvls, function(lvl) {
-                            vals <- tgt[as.character(pred) == lvl]
-                            if (length(vals) == 0) return(NULL)
-                            list(
-                                label = lvl,
-                                mean = as.numeric(mean(vals, na.rm = TRUE)),
-                                n = as.integer(length(vals))
-                            )
-                        }))
+                        grps <- Filter(
+                            Negate(is.null),
+                            lapply(lvls, function(lvl) {
+                                vals <- tgt[as.character(pred) == lvl]
+                                if (length(vals) == 0) return(NULL)
+                                list(
+                                    label = lvl,
+                                    mean = as.numeric(mean(vals, na.rm = TRUE)),
+                                    n = as.integer(length(vals))
+                                )
+                            })
+                        )
                         details[[name]] <- list(
                             type = "bars",
                             groups = I(grps),
@@ -245,15 +258,18 @@ relationsClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     } else if (!targetIsNum && predIsNum) {
                         lvls <- if (is.factor(tgt)) levels(tgt) else
                             sort(unique(as.character(tgt)))
-                        grps <- Filter(Negate(is.null), lapply(lvls, function(lvl) {
-                            vals <- pred[as.character(tgt) == lvl]
-                            if (length(vals) == 0) return(NULL)
-                            list(
-                                label = lvl,
-                                mean = as.numeric(mean(vals, na.rm = TRUE)),
-                                n = as.integer(length(vals))
-                            )
-                        }))
+                        grps <- Filter(
+                            Negate(is.null),
+                            lapply(lvls, function(lvl) {
+                                vals <- pred[as.character(tgt) == lvl]
+                                if (length(vals) == 0) return(NULL)
+                                list(
+                                    label = lvl,
+                                    mean = as.numeric(mean(vals, na.rm = TRUE)),
+                                    n = as.integer(length(vals))
+                                )
+                            })
+                        )
                         details[[name]] <- list(
                             type = "bars",
                             groups = I(grps),

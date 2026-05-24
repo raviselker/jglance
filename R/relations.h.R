@@ -8,7 +8,9 @@ relationsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         initialize = function(
             vars = NULL,
             selectedTarget = "",
-            viewMode = "list", ...) {
+            viewMode = "list",
+            typeFilter = "all",
+            sortMode = "strength", ...) {
 
             super$initialize(
                 package="jglance",
@@ -34,19 +36,44 @@ relationsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 viewMode,
                 hidden=TRUE,
                 default="list")
+            private$..typeFilter <- jmvcore::OptionList$new(
+                "typeFilter",
+                typeFilter,
+                hidden=TRUE,
+                options=list(
+                    "all",
+                    "continuous",
+                    "categorical"),
+                default="all")
+            private$..sortMode <- jmvcore::OptionList$new(
+                "sortMode",
+                sortMode,
+                hidden=TRUE,
+                options=list(
+                    "strength",
+                    "name",
+                    "type",
+                    "original"),
+                default="strength")
 
             self$.addOption(private$..vars)
             self$.addOption(private$..selectedTarget)
             self$.addOption(private$..viewMode)
+            self$.addOption(private$..typeFilter)
+            self$.addOption(private$..sortMode)
         }),
     active = list(
         vars = function() private$..vars$value,
         selectedTarget = function() private$..selectedTarget$value,
-        viewMode = function() private$..viewMode$value),
+        viewMode = function() private$..viewMode$value,
+        typeFilter = function() private$..typeFilter$value,
+        sortMode = function() private$..sortMode$value),
     private = list(
         ..vars = NA,
         ..selectedTarget = NA,
-        ..viewMode = NA)
+        ..viewMode = NA,
+        ..typeFilter = NA,
+        ..sortMode = NA)
 )
 
 relationsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -96,6 +123,8 @@ relationsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param vars .
 #' @param selectedTarget .
 #' @param viewMode .
+#' @param typeFilter .
+#' @param sortMode .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$relations} \tab \tab \tab \tab \tab a html \cr
@@ -106,7 +135,9 @@ relations <- function(
     data,
     vars = NULL,
     selectedTarget = "",
-    viewMode = "list") {
+    viewMode = "list",
+    typeFilter = "all",
+    sortMode = "strength") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("relations requires jmvcore to be installed (restart may be required)")
@@ -122,7 +153,9 @@ relations <- function(
     options <- relationsOptions$new(
         vars = vars,
         selectedTarget = selectedTarget,
-        viewMode = viewMode)
+        viewMode = viewMode,
+        typeFilter = typeFilter,
+        sortMode = sortMode)
 
     analysis <- relationsClass$new(
         options = options,

@@ -126,7 +126,12 @@ const mosaicData = computed(() => {
         const rowCounts = counts[ri] ?? [];
         const bars = cols.map((col, ci) => {
             const count = rowCounts[ci] ?? 0;
-            return { col, color: COLORS[ci % COLORS.length], count, pct: (count / globalMax) * 100 };
+            return {
+                col,
+                color: COLORS[ci % COLORS.length],
+                count,
+                pct: (count / globalMax) * 100,
+            };
         });
         return { row, bars };
     });
@@ -147,30 +152,97 @@ const mosaicData = computed(() => {
         <!-- ── SCATTER ── -->
         <g v-if="scatterSvg">
             <!-- axes -->
-            <line :x1="ML" :y1="MT" :x2="ML" :y2="MT + PH" style="stroke: var(--rule)" stroke-width="1" />
-            <line :x1="ML" :y1="MT + PH" :x2="ML + PW" :y2="MT + PH" style="stroke: var(--rule)" stroke-width="1" />
+            <line
+                :x1="ML"
+                :y1="MT"
+                :x2="ML"
+                :y2="MT + PH"
+                style="stroke: var(--rule)"
+                stroke-width="1"
+            />
+            <line
+                :x1="ML"
+                :y1="MT + PH"
+                :x2="ML + PW"
+                :y2="MT + PH"
+                style="stroke: var(--rule)"
+                stroke-width="1"
+            />
             <!-- y ticks + gridlines -->
             <g v-for="t in scatterSvg.yTicks" :key="t.y">
-                <line :x1="ML - 3" :y1="t.y" :x2="ML" :y2="t.y" style="stroke: var(--rule)" stroke-width="1" />
-                <text :x="ML - 5" :y="t.y + 3.5" text-anchor="end" font-size="9" style="fill: var(--ink-4)">{{ t.label }}</text>
-                <line :x1="ML" :y1="t.y" :x2="ML + PW" :y2="t.y" style="stroke: var(--rule-soft)" stroke-width="0.5" stroke-dasharray="2,3" />
+                <line
+                    :x1="ML - 3"
+                    :y1="t.y"
+                    :x2="ML"
+                    :y2="t.y"
+                    style="stroke: var(--rule)"
+                    stroke-width="1"
+                />
+                <text
+                    :x="ML - 5"
+                    :y="t.y + 3.5"
+                    text-anchor="end"
+                    font-size="9"
+                    style="fill: var(--ink-4)"
+                >
+                    {{ t.label }}
+                </text>
+                <line
+                    :x1="ML"
+                    :y1="t.y"
+                    :x2="ML + PW"
+                    :y2="t.y"
+                    style="stroke: var(--rule-soft)"
+                    stroke-width="0.5"
+                    stroke-dasharray="2,3"
+                />
             </g>
             <!-- x ticks -->
             <g v-for="t in scatterSvg.xTicks" :key="t.x">
-                <line :x1="t.x" :y1="MT + PH" :x2="t.x" :y2="MT + PH + 3" style="stroke: var(--rule)" stroke-width="1" />
-                <text :x="t.x" :y="MT + PH + 12" text-anchor="middle" font-size="9" style="fill: var(--ink-4)">{{ t.label }}</text>
+                <line
+                    :x1="t.x"
+                    :y1="MT + PH"
+                    :x2="t.x"
+                    :y2="MT + PH + 3"
+                    style="stroke: var(--rule)"
+                    stroke-width="1"
+                />
+                <text
+                    :x="t.x"
+                    :y="MT + PH + 12"
+                    text-anchor="middle"
+                    font-size="9"
+                    style="fill: var(--ink-4)"
+                >
+                    {{ t.label }}
+                </text>
             </g>
             <!-- axis labels -->
-            <text :x="ML + PW / 2" :y="VB_H - 1" text-anchor="middle" font-size="9" style="fill: var(--ink-3)">
+            <text
+                :x="ML + PW / 2"
+                :y="VB_H - 1"
+                text-anchor="middle"
+                font-size="9"
+                style="fill: var(--ink-3)"
+            >
                 {{ truncLabel(scatterSvg.xLabel) }}
             </text>
-            <text :x="10" :y="MT + PH / 2" text-anchor="middle" font-size="9" style="fill: var(--ink-3)" :transform="`rotate(-90, 10, ${MT + PH / 2})`">
+            <text
+                :x="10"
+                :y="MT + PH / 2"
+                text-anchor="middle"
+                font-size="9"
+                style="fill: var(--ink-3)"
+                :transform="`rotate(-90, 10, ${MT + PH / 2})`"
+            >
                 {{ truncLabel(scatterSvg.yLabel) }}
             </text>
             <!-- trend line — dashed to distinguish from points -->
             <line
-                :x1="scatterSvg.trend.x1" :y1="scatterSvg.trend.y1"
-                :x2="scatterSvg.trend.x2" :y2="scatterSvg.trend.y2"
+                :x1="scatterSvg.trend.x1"
+                :y1="scatterSvg.trend.y1"
+                :x2="scatterSvg.trend.x2"
+                :y2="scatterSvg.trend.y2"
                 style="stroke: var(--accent)"
                 stroke-width="1.5"
                 stroke-dasharray="5,3"
@@ -181,7 +253,8 @@ const mosaicData = computed(() => {
             <circle
                 v-for="(p, i) in scatterSvg.svgPoints"
                 :key="i"
-                :cx="p.x" :cy="p.y"
+                :cx="p.x"
+                :cy="p.y"
                 r="2.5"
                 style="fill: var(--accent)"
                 stroke="white"
@@ -189,7 +262,6 @@ const mosaicData = computed(() => {
                 opacity="0.7"
             />
         </g>
-
     </svg>
 
     <!-- ── BARS: HTML (matches Overview's CategoricalDetail style) ── -->
@@ -217,18 +289,10 @@ const mosaicData = computed(() => {
 
     <!-- ── MOSAIC: grouped horizontal bars, one per col within each row ── -->
     <div v-else-if="mosaicData" class="mosaic-mini">
-        <div
-            v-for="r in mosaicData.rowData"
-            :key="r.row"
-            class="mosaic-group"
-        >
+        <div v-for="r in mosaicData.rowData" :key="r.row" class="mosaic-group">
             <p class="mosaic-group__label">{{ r.row }}</p>
             <ul class="bars-mini__list">
-                <li
-                    v-for="b in r.bars"
-                    :key="b.col"
-                    class="bars-mini__row"
-                >
+                <li v-for="b in r.bars" :key="b.col" class="bars-mini__row">
                     <span class="bars-mini__name">{{ b.col }}</span>
                     <div class="bars-mini__track">
                         <div

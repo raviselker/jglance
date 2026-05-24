@@ -7,8 +7,17 @@ export type RelationsTypeFilter = 'all' | 'continuous' | 'categorical';
 export type RelationsSortMode = 'strength' | 'name' | 'type' | 'original';
 export type RelationsViewMode = 'list' | 'matrix';
 
-const VALID_TYPE_FILTERS: RelationsTypeFilter[] = ['all', 'continuous', 'categorical'];
-const VALID_SORT_MODES: RelationsSortMode[] = ['strength', 'name', 'type', 'original'];
+const VALID_TYPE_FILTERS: RelationsTypeFilter[] = [
+    'all',
+    'continuous',
+    'categorical',
+];
+const VALID_SORT_MODES: RelationsSortMode[] = [
+    'strength',
+    'name',
+    'type',
+    'original',
+];
 const VALID_VIEW_MODES: RelationsViewMode[] = ['list', 'matrix'];
 
 export interface RelationsState {
@@ -31,7 +40,8 @@ export function useRelationsState(
             ? (data.viewMode as RelationsViewMode)
             : 'list';
     const seedTypeFilter: RelationsTypeFilter =
-        data.typeFilter && (VALID_TYPE_FILTERS as string[]).includes(data.typeFilter)
+        data.typeFilter &&
+        (VALID_TYPE_FILTERS as string[]).includes(data.typeFilter)
             ? (data.typeFilter as RelationsTypeFilter)
             : 'all';
     const seedSortMode: RelationsSortMode =
@@ -39,10 +49,22 @@ export function useRelationsState(
             ? (data.sortMode as RelationsSortMode)
             : 'strength';
 
-    const selectedTarget = useJamoviOption<string>('selectedTarget', seedTarget);
-    const viewMode = useJamoviOption<RelationsViewMode>('viewMode', seedViewMode);
-    const typeFilter = useJamoviOption<RelationsTypeFilter>('typeFilter', seedTypeFilter);
-    const sortMode = useJamoviOption<RelationsSortMode>('sortMode', seedSortMode);
+    const selectedTarget = useJamoviOption<string>(
+        'selectedTarget',
+        seedTarget
+    );
+    const viewMode = useJamoviOption<RelationsViewMode>(
+        'viewMode',
+        seedViewMode
+    );
+    const typeFilter = useJamoviOption<RelationsTypeFilter>(
+        'typeFilter',
+        seedTypeFilter
+    );
+    const sortMode = useJamoviOption<RelationsSortMode>(
+        'sortMode',
+        seedSortMode
+    );
 
     const expandedVars = ref<Set<string>>(new Set());
 

@@ -9,7 +9,10 @@ import type {
 import MiniPlot from './widgets/relations/MiniPlot.vue';
 import MatrixView from './widgets/relations/MatrixView.vue';
 import { useRelationsState } from './composables/useRelationsState';
-import type { RelationsSortMode, RelationsTypeFilter } from './composables/useRelationsState';
+import type {
+    RelationsSortMode,
+    RelationsTypeFilter,
+} from './composables/useRelationsState';
 
 const props = defineProps<{
     data: IRelationsData;
@@ -162,7 +165,11 @@ type PredictorItem =
 const predictorItems = computed((): PredictorItem[] => {
     const sorted = predictors.value;
     if (sortMode.value !== 'type') {
-        const rows = sorted.map((p) => ({ kind: 'row' as const, key: p.name, ...p }));
+        const rows = sorted.map((p) => ({
+            kind: 'row' as const,
+            key: p.name,
+            ...p,
+        }));
         return [{ kind: 'colheader', key: 'colheader' }, ...rows];
     }
     const items: PredictorItem[] = [];
@@ -199,7 +206,6 @@ const associationBreakdown = computed(() => {
     if (nCat > 0) parts.push(`${nCat} categorical`);
     return `${vars.length} associations · ${parts.join(' · ')}`;
 });
-
 
 const matrixVars = computed(() => {
     let vars = props.data.variables;
@@ -267,11 +273,41 @@ function fmt(v: number): string {
                         opacity="0.18"
                         stroke-linecap="round"
                     />
-                    <circle cx="10" cy="38" r="3" fill="currentColor" opacity="0.2" />
-                    <circle cx="17" cy="30" r="3" fill="currentColor" opacity="0.3" />
-                    <circle cx="24" cy="23" r="3" fill="currentColor" opacity="0.45" />
-                    <circle cx="31" cy="17" r="3" fill="currentColor" opacity="0.3" />
-                    <circle cx="39" cy="10" r="3" fill="currentColor" opacity="0.2" />
+                    <circle
+                        cx="10"
+                        cy="38"
+                        r="3"
+                        fill="currentColor"
+                        opacity="0.2"
+                    />
+                    <circle
+                        cx="17"
+                        cy="30"
+                        r="3"
+                        fill="currentColor"
+                        opacity="0.3"
+                    />
+                    <circle
+                        cx="24"
+                        cy="23"
+                        r="3"
+                        fill="currentColor"
+                        opacity="0.45"
+                    />
+                    <circle
+                        cx="31"
+                        cy="17"
+                        r="3"
+                        fill="currentColor"
+                        opacity="0.3"
+                    />
+                    <circle
+                        cx="39"
+                        cy="10"
+                        r="3"
+                        fill="currentColor"
+                        opacity="0.2"
+                    />
                 </svg>
                 <p class="relations__empty-title">
                     {{
@@ -293,10 +329,40 @@ function fmt(v: number): string {
                     :class="{ 'is-active': viewMode === 'list' }"
                     @click="viewMode = 'list'"
                 >
-                    <svg width="13" height="11" viewBox="0 0 13 11" aria-hidden="true" fill="none">
-                        <line x1="0" y1="1" x2="13" y2="1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                        <line x1="0" y1="5.5" x2="13" y2="5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                        <line x1="0" y1="10" x2="13" y2="10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    <svg
+                        width="13"
+                        height="11"
+                        viewBox="0 0 13 11"
+                        aria-hidden="true"
+                        fill="none"
+                    >
+                        <line
+                            x1="0"
+                            y1="1"
+                            x2="13"
+                            y2="1"
+                            stroke="currentColor"
+                            stroke-width="1.5"
+                            stroke-linecap="round"
+                        />
+                        <line
+                            x1="0"
+                            y1="5.5"
+                            x2="13"
+                            y2="5.5"
+                            stroke="currentColor"
+                            stroke-width="1.5"
+                            stroke-linecap="round"
+                        />
+                        <line
+                            x1="0"
+                            y1="10"
+                            x2="13"
+                            y2="10"
+                            stroke="currentColor"
+                            stroke-width="1.5"
+                            stroke-linecap="round"
+                        />
                     </svg>
                     <span>List</span>
                 </button>
@@ -306,18 +372,56 @@ function fmt(v: number): string {
                     :class="{ 'is-active': viewMode === 'matrix' }"
                     @click="viewMode = 'matrix'"
                 >
-                    <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
-                        <rect x="0" y="0" width="5" height="5" rx="1" fill="currentColor"/>
-                        <rect x="7" y="0" width="5" height="5" rx="1" fill="currentColor"/>
-                        <rect x="0" y="7" width="5" height="5" rx="1" fill="currentColor"/>
-                        <rect x="7" y="7" width="5" height="5" rx="1" fill="currentColor"/>
+                    <svg
+                        width="12"
+                        height="12"
+                        viewBox="0 0 12 12"
+                        aria-hidden="true"
+                    >
+                        <rect
+                            x="0"
+                            y="0"
+                            width="5"
+                            height="5"
+                            rx="1"
+                            fill="currentColor"
+                        />
+                        <rect
+                            x="7"
+                            y="0"
+                            width="5"
+                            height="5"
+                            rx="1"
+                            fill="currentColor"
+                        />
+                        <rect
+                            x="0"
+                            y="7"
+                            width="5"
+                            height="5"
+                            rx="1"
+                            fill="currentColor"
+                        />
+                        <rect
+                            x="7"
+                            y="7"
+                            width="5"
+                            height="5"
+                            rx="1"
+                            fill="currentColor"
+                        />
                     </svg>
                     <span>Matrix</span>
                 </button>
             </div>
 
             <!-- ── Focus section ── -->
-            <div v-if="viewMode === 'list'" class="focus-section" :class="{ 'is-open': showDropdown }" @click.stop>
+            <div
+                v-if="viewMode === 'list'"
+                class="focus-section"
+                :class="{ 'is-open': showDropdown }"
+                @click.stop
+            >
                 <!-- Trigger row -->
                 <div
                     class="focus-trigger"
@@ -531,15 +635,29 @@ function fmt(v: number): string {
                 <ul v-else class="assoc-list">
                     <template v-for="item in predictorItems" :key="item.key">
                         <!-- Column header (non-type sorts) -->
-                        <li v-if="item.kind === 'colheader'" class="assoc-colheader" aria-hidden="true">
+                        <li
+                            v-if="item.kind === 'colheader'"
+                            class="assoc-colheader"
+                            aria-hidden="true"
+                        >
                             <span class="assoc-colheader__var">Variable</span>
-                            <span class="assoc-colheader__effect">Effect size</span>
+                            <span class="assoc-colheader__effect"
+                                >Effect size</span
+                            >
                         </li>
 
                         <!-- Type group heading -->
-                        <li v-else-if="item.kind === 'header'" class="assoc-group">
-                            <span class="assoc-group__label">{{ item.label }}</span>
-                            <span class="assoc-group__count">{{ item.count }} {{ item.count === 1 ? 'var' : 'vars' }}</span>
+                        <li
+                            v-else-if="item.kind === 'header'"
+                            class="assoc-group"
+                        >
+                            <span class="assoc-group__label">{{
+                                item.label
+                            }}</span>
+                            <span class="assoc-group__count"
+                                >{{ item.count }}
+                                {{ item.count === 1 ? 'var' : 'vars' }}</span
+                            >
                             <span class="assoc-group__effect">Effect size</span>
                         </li>
 
@@ -547,12 +665,16 @@ function fmt(v: number): string {
                         <li
                             v-else-if="item.kind === 'row'"
                             class="assoc-item"
-                            :class="{ 'is-expanded': expandedVars.has(item.name) }"
+                            :class="{
+                                'is-expanded': expandedVars.has(item.name),
+                            }"
                         >
                             <button
                                 type="button"
                                 class="assoc-row"
-                                :class="{ 'is-selected': expandedVars.has(item.name) }"
+                                :class="{
+                                    'is-selected': expandedVars.has(item.name),
+                                }"
                                 @click="toggleExpand(item.name)"
                                 :aria-expanded="expandedVars.has(item.name)"
                             >
@@ -562,7 +684,9 @@ function fmt(v: number): string {
                                     :class="`is-${item.type}`"
                                     aria-hidden="true"
                                 ></span>
-                                <span class="assoc-row__name">{{ item.name }}</span>
+                                <span class="assoc-row__name">{{
+                                    item.name
+                                }}</span>
                                 <span class="assoc-row__type">{{
                                     typeLabel(item.type)
                                 }}</span>
@@ -588,19 +712,29 @@ function fmt(v: number): string {
 
                             <Transition name="detail">
                                 <div
-                                    v-if="expandedVars.has(item.name) && pairDetail(item.name)"
+                                    v-if="
+                                        expandedVars.has(item.name) &&
+                                        pairDetail(item.name)
+                                    "
                                     class="assoc-detail"
                                 >
                                     <p class="assoc-detail__title">
                                         {{ item.name }} × {{ selectedTarget }}
                                         <span class="assoc-detail__stat">
                                             ·
-                                            {{ statLabel(targetVar!.type, item.type) }}
+                                            {{
+                                                statLabel(
+                                                    targetVar!.type,
+                                                    item.type
+                                                )
+                                            }}
                                             =
                                             {{ fmt(item.association) }}
                                         </span>
                                     </p>
-                                    <MiniPlot :detail="pairDetail(item.name)!" />
+                                    <MiniPlot
+                                        :detail="pairDetail(item.name)!"
+                                    />
                                 </div>
                             </Transition>
                         </li>
@@ -904,7 +1038,6 @@ function fmt(v: number): string {
     font-style: italic;
     text-align: center;
 }
-
 
 /* ── Association list ── */
 /* ── Association controls bar ── */
