@@ -28,4 +28,16 @@ options:
       type: String
       hidden: true
       default: 'list'
+
+    - name: typeFilter
+      type: List
+      hidden: true
+      options: [all, continuous, categorical]
+      default: all
+
+    - name: sortMode
+      type: List
+      hidden: true
+      options: [strength, name, type, original]
+      default: strength
 ...
