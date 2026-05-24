@@ -89,6 +89,56 @@ The bundle exposes `window.Jglance = { createOverview, PlotStateStore }`. State 
 
 ---
 
+## State persistence pattern
+
+UI state that should survive `.omv` save/reopen uses a three-layer contract:
+
+```
+hidden YAML option (type + default)
+  → R reads self$options$<name>, threads into JSON payload
+    → useJamoviOption('name', seed) seeds a Vue ref from the payload
+      → watch inside useJamoviOption fires window.setOption() on every change
+        → jamovi persists the value to .omv and triggers an R re-run
+```
+
+**When to use what:**
+
+| Need | Mechanism |
+|---|---|
+| Survive `.omv` save/reopen | `useJamoviOption` + hidden YAML option |
+| Survive jamovi re-render (within session) | `PlotStateStore` (sessionStorage) |
+| Ephemeral (reset on re-render is fine) | Plain `ref` |
+
+**Adding a new persistent option to an analysis:**
+
+1. Add a hidden option to `jamovi/<name>.a.yaml`:
+   ```yaml
+   - name: myOption
+     type: List          # or String / Bool — match what JS will write
+     hidden: true
+     options:
+       - name: a
+       - name: b
+       - name: c
+     default: a
+   ```
+2. Read it in `R/<name>.b.R` using the defensive pattern and thread into the payload:
+   ```r
+   myOptionRaw <- self$options$myOption
+   myOption <- if (is.null(myOptionRaw) || length(myOptionRaw) == 0) "a" else as.character(myOptionRaw)
+   # then include myOption in the payload list
+   ```
+3. Add the field to the `IXxxData` interface in `client/src/common.ts`.
+4. In the analysis composable, call `useJamoviOption`:
+   ```ts
+   import { useJamoviOption } from './useJamoviOption';
+   const myOption = useJamoviOption<'a' | 'b' | 'c'>('myOption', data.myOption ?? 'a')
+   ```
+
+**Constraint:** `useJamoviOption` (in `client/src/composables/useJamoviOption.ts`) uses Vue's `watch` and must be called inside a component `setup()` or a composable that is itself called from `setup()`.
+
+---
+
 ## Conventions
 
 ### CSS scoping
