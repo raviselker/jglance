@@ -32,12 +32,19 @@ options:
     - name: typeFilter
       type: List
       hidden: true
-      options: [all, continuous, categorical]
+      options:
+        - name: all
+        - name: continuous
+        - name: categorical
       default: all
 
     - name: sortMode
       type: List
       hidden: true
-      options: [strength, name, type, original]
+      options:
+        - name: strength
+        - name: name
+        - name: type
+        - name: original
       default: strength
 ...
